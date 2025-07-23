@@ -54,7 +54,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Items</span>
-          <Button size="sm" onClick={addItem} className="flex items-center space-x-2">
+          <Button type="button" size="sm" onClick={addItem} className="flex items-center space-x-2">
             <Plus className="w-4 h-4" />
             <span>Add Item</span>
           </Button>
@@ -119,6 +119,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 ₹{item.totalAmount.toFixed(2)}
               </div>
               <Button
+                type="button"
                 variant="ghost"
                 size="sm"
                 onClick={() => removeItem(item.id)}
