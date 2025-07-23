@@ -22,7 +22,7 @@ const GST_RATES = [
 export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
   const addItem = () => {
     const newItem: InvoiceItem = {
-      id: `item-${Date.now()}`,
+      id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       description: "",
       quantity: 1,
       rate: 0,
@@ -123,7 +123,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 size="sm"
                 onClick={() => removeItem(item.id)}
                 className="col-span-1"
-                disabled={items.length === 1}
+                disabled={items.length <= 1}
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
