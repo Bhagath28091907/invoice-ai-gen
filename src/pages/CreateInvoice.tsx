@@ -1,12 +1,85 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calculator, Plus, Download, Send, Save } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Toaster } from "@/components/ui/toaster";
+import { BusinessInformationForm } from "@/components/invoice/BusinessInformationForm";
+import { ClientInformationForm } from "@/components/invoice/ClientInformationForm";
+import { InvoiceDetailsForm } from "@/components/invoice/InvoiceDetailsForm";
+import { ItemsForm } from "@/components/invoice/ItemsForm";
+import { InvoiceSummary } from "@/components/invoice/InvoiceSummary";
+import { InvoiceFormData, InvoiceItem } from "@/types/invoice";
+import { calculateInvoiceSummary } from "@/lib/invoice-calculations";
+
+const invoiceSchema = z.object({
+  businessName: z.string().min(1, "Business name is required"),
+  gstin: z.string().min(15, "Valid GSTIN is required"),
+  businessAddress: z.string().min(1, "Business address is required"),
+  businessState: z.string().min(1, "Business state is required"),
+  clientName: z.string().min(1, "Client name is required"),
+  clientGstin: z.string().optional(),
+  clientAddress: z.string().min(1, "Client address is required"),
+  clientState: z.string().min(1, "Client state is required"),
+  invoiceNumber: z.string().min(1, "Invoice number is required"),
+  invoiceDate: z.string().min(1, "Invoice date is required"),
+  dueDate: z.string().optional(),
+  items: z.array(z.any()).min(1, "At least one item is required"),
+  notes: z.string().optional(),
+});
 
 const CreateInvoice = () => {
+  const [items, setItems] = useState<InvoiceItem[]>([
+    {
+      id: `item-${Date.now()}`,
+      description: "",
+      quantity: 1,
+      rate: 0,
+      gstRate: 18,
+      amount: 0,
+      gstAmount: 0,
+      totalAmount: 0,
+    },
+  ]);
+
+  const form = useForm<InvoiceFormData>({
+    resolver: zodResolver(invoiceSchema),
+    defaultValues: {
+      businessName: "",
+      gstin: "",
+      businessAddress: "",
+      businessState: "",
+      clientName: "",
+      clientGstin: "",
+      clientAddress: "",
+      clientState: "",
+      invoiceNumber: "",
+      invoiceDate: "",
+      dueDate: "",
+      items: [],
+      notes: "",
+    },
+  });
+
+  const { register, handleSubmit, setValue, watch, formState: { errors, isValid } } = form;
+  const watchedValues = watch();
+
+  // Update items in form when items state changes
+  useEffect(() => {
+    setValue("items", items);
+  }, [items, setValue]);
+
+  // Calculate summary whenever items or states change
+  const summary = calculateInvoiceSummary(
+    items,
+    watchedValues.businessState || "",
+    watchedValues.clientState || ""
+  );
+
+  // Check if form is valid for PDF generation
+  const canGeneratePDF = isValid && items.length > 0 && items.some(item => 
+    item.description && item.quantity > 0 && item.rate > 0
+  );
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
@@ -15,204 +88,35 @@ const CreateInvoice = () => {
           <p className="text-muted-foreground">Generate professional GST-compliant invoices with automatic calculations</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <form className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            {/* Business Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Calculator className="w-5 h-5" />
-                  <span>Business Information</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="businessName">Business Name *</Label>
-                    <Input id="businessName" placeholder="Enter business name" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="gstin">GSTIN *</Label>
-                    <Input id="gstin" placeholder="22AAAAA0000A1Z5" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="businessAddress">Business Address *</Label>
-                  <Textarea id="businessAddress" placeholder="Enter complete business address" rows={3} />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Client Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Client Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="clientName">Client Name *</Label>
-                    <Input id="clientName" placeholder="Enter client name" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="clientGstin">Client GSTIN</Label>
-                    <Input id="clientGstin" placeholder="22BBBBB0000B1Z5" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="clientAddress">Client Address *</Label>
-                  <Textarea id="clientAddress" placeholder="Enter client address" rows={3} />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="clientState">State *</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select state" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="maharashtra">Maharashtra</SelectItem>
-                        <SelectItem value="gujarat">Gujarat</SelectItem>
-                        <SelectItem value="karnataka">Karnataka</SelectItem>
-                        <SelectItem value="tamil-nadu">Tamil Nadu</SelectItem>
-                        <SelectItem value="delhi">Delhi</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="businessState">Business State *</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select state" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="maharashtra">Maharashtra</SelectItem>
-                        <SelectItem value="gujarat">Gujarat</SelectItem>
-                        <SelectItem value="karnataka">Karnataka</SelectItem>
-                        <SelectItem value="tamil-nadu">Tamil Nadu</SelectItem>
-                        <SelectItem value="delhi">Delhi</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Invoice Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Invoice Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="invoiceNumber">Invoice Number *</Label>
-                    <Input id="invoiceNumber" placeholder="INV-001" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="invoiceDate">Invoice Date *</Label>
-                    <Input id="invoiceDate" type="date" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="dueDate">Due Date</Label>
-                    <Input id="dueDate" type="date" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Items */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Items</span>
-                  <Button size="sm" className="flex items-center space-x-2">
-                    <Plus className="w-4 h-4" />
-                    <span>Add Item</span>
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground">
-                    <div className="col-span-4">Description</div>
-                    <div className="col-span-2">Quantity</div>
-                    <div className="col-span-2">Rate</div>
-                    <div className="col-span-2">GST Rate</div>
-                    <div className="col-span-2">Amount</div>
-                  </div>
-                  <div className="grid grid-cols-12 gap-2">
-                    <Input className="col-span-4" placeholder="Item description" />
-                    <Input className="col-span-2" type="number" placeholder="1" />
-                    <Input className="col-span-2" type="number" placeholder="0.00" />
-                    <Select>
-                      <SelectTrigger className="col-span-2">
-                        <SelectValue placeholder="GST%" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">0%</SelectItem>
-                        <SelectItem value="5">5%</SelectItem>
-                        <SelectItem value="12">12%</SelectItem>
-                        <SelectItem value="18">18%</SelectItem>
-                        <SelectItem value="28">28%</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <div className="col-span-2 flex items-center text-sm text-muted-foreground">
-                      ₹0.00
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <BusinessInformationForm 
+              register={register} 
+              setValue={setValue} 
+              watch={watch} 
+            />
+            
+            <ClientInformationForm 
+              register={register} 
+              setValue={setValue} 
+              watch={watch} 
+            />
+            
+            <InvoiceDetailsForm register={register} />
+            
+            <ItemsForm items={items} onItemsChange={setItems} />
           </div>
 
-          {/* Invoice Summary */}
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Invoice Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Subtotal:</span>
-                    <span>₹0.00</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>CGST (9%):</span>
-                    <span>₹0.00</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>SGST (9%):</span>
-                    <span>₹0.00</span>
-                  </div>
-                  <div className="border-t pt-2">
-                    <div className="flex justify-between font-semibold">
-                      <span>Total:</span>
-                      <span>₹0.00</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="space-y-3">
-              <Button variant="hero" size="lg" className="w-full">
-                <Download className="w-5 h-5" />
-                Generate PDF
-              </Button>
-              <Button variant="outline" size="lg" className="w-full">
-                <Send className="w-5 h-5" />
-                Email to Client
-              </Button>
-              <Button variant="secondary" size="lg" className="w-full">
-                <Save className="w-5 h-5" />
-                Save Invoice
-              </Button>
-            </div>
+            <InvoiceSummary 
+              summary={summary} 
+              formData={{ ...watchedValues, items }} 
+              isValid={canGeneratePDF} 
+            />
           </div>
-        </div>
+        </form>
       </div>
+      <Toaster />
     </div>
   );
 };
