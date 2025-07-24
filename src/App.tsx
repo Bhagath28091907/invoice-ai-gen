@@ -6,11 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import CreateInvoice from "./pages/CreateInvoice";
 import InvoiceHistory from "./pages/InvoiceHistory";
-import SampleInvoice from "./pages/SampleInvoice";
+
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Header from "./components/Header";
-import Footer from "./components/Footer";
+
 
 const queryClient = new QueryClient();
 
@@ -27,12 +27,12 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/create" element={<CreateInvoice />} />
               <Route path="/history" element={<InvoiceHistory />} />
-              <Route path="/sample" element={<SampleInvoice />} />
+              
               <Route path="/about" element={<About />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
-          <Footer />
+          
         </div>
       </BrowserRouter>
     </TooltipProvider>

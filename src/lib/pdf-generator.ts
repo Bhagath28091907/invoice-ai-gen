@@ -230,18 +230,16 @@ export const generateInvoicePDF = async (
     yPos += notesSplit.length * 8;
   }
   
-  // Professional Footer
-  const footerY = pageHeight - 25;
+  // Clean professional footer with minimal text
+  const footerY = pageHeight - 15;
   pdf.setDrawColor(220, 220, 220);
-  pdf.line(margin, footerY - 10, pageWidth - margin, footerY - 10);
+  pdf.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
   
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "normal");
-  pdf.setTextColor(100, 100, 100);
-  pdf.text("This is a computer generated invoice and does not require physical signature.", 
+  pdf.setTextColor(80, 80, 80);
+  pdf.text("This is a computer generated invoice.", 
     pageWidth / 2, footerY, { align: "center" });
-  pdf.text(`Generated on: ${new Date().toLocaleDateString('en-IN')} at ${new Date().toLocaleTimeString('en-IN')}`, 
-    pageWidth / 2, footerY + 8, { align: "center" });
   
   // Download the PDF with professional naming
   const fileName = `Invoice_${formData.invoiceNumber}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;

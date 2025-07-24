@@ -71,12 +71,6 @@ const Index = () => {
                     Create Invoice
                   </Button>
                 </Link>
-                <Link to="/sample">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                    <FileText className="w-5 h-5" />
-                    See Sample
-                  </Button>
-                </Link>
               </div>
             </div>
             <div className="relative">
