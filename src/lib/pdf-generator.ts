@@ -11,112 +11,117 @@ export const generateInvoicePDF = async (
   const pdf = new jsPDF();
   const pageWidth = pdf.internal.pageSize.width;
   const pageHeight = pdf.internal.pageSize.height;
-  const margin = 12; // Reduced margin for better space utilization
-  let yPos = 25;
+  const margin = 10; // Minimal margin for maximum space
+  let yPos = 20;
 
-  // Professional Header with enhanced design
-  pdf.setFillColor(41, 98, 255); // Professional blue
-  pdf.rect(0, 0, pageWidth, 28, 'F');
+  // Compact Header
+  pdf.setFillColor(41, 98, 255);
+  pdf.rect(0, 0, pageWidth, 22, 'F');
   
-  pdf.setFontSize(20);
+  pdf.setFontSize(16);
   pdf.setFont("helvetica", "bold");
   pdf.setTextColor(255, 255, 255);
-  pdf.text("TAX INVOICE", pageWidth / 2, 18, { align: "center" });
+  pdf.text("TAX INVOICE", pageWidth / 2, 14, { align: "center" });
   
-  // Header sections layout - using full width
-  yPos = 38;
+  // Compact layout - using full width efficiently
+  yPos = 28;
   const leftColWidth = (pageWidth * 0.65) - margin;
   const rightColX = pageWidth * 0.68;
   const rightColWidth = (pageWidth * 0.32) - margin;
 
-  // Business Information Section (Left Column)
+  // Business Information (Left) - Compact
   pdf.setTextColor(0, 0, 0);
-  pdf.setFillColor(248, 250, 252);
-  pdf.rect(margin, yPos, leftColWidth, 80, 'F');
-  pdf.setDrawColor(230, 230, 230);
-  pdf.rect(margin, yPos, leftColWidth, 80);
+  pdf.setFillColor(250, 250, 250);
+  pdf.rect(margin, yPos, leftColWidth, 55, 'F');
+  pdf.setDrawColor(220, 220, 220);
+  pdf.rect(margin, yPos, leftColWidth, 55);
 
+  pdf.setFontSize(9);
+  pdf.setFont("helvetica", "bold");
+  pdf.text("BILL FROM:", margin + 3, yPos + 8);
+  
   pdf.setFontSize(11);
   pdf.setFont("helvetica", "bold");
-  pdf.text("BILL FROM:", margin + 5, yPos + 12);
-  
-  pdf.setFontSize(14);
-  pdf.setFont("helvetica", "bold");
-  pdf.text(formData.businessName.toUpperCase(), margin + 5, yPos + 25);
+  pdf.text(formData.businessName.toUpperCase(), margin + 3, yPos + 17);
   
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(9);
-  pdf.text(`GSTIN: ${formData.gstin}`, margin + 5, yPos + 35);
+  pdf.setFontSize(8);
+  pdf.text(`GSTIN: ${formData.gstin}`, margin + 3, yPos + 25);
   
   const businessAddressLines = formData.businessAddress.split('\n');
-  let businessYPos = yPos + 45;
+  let businessYPos = yPos + 32;
   businessAddressLines.forEach((line) => {
-    if (line.trim() && businessYPos < yPos + 75) {
-      pdf.text(line.trim(), margin + 5, businessYPos);
-      businessYPos += 8;
+    if (line.trim() && businessYPos < yPos + 50) {
+      pdf.text(line.trim(), margin + 3, businessYPos);
+      businessYPos += 6;
     }
   });
 
-  // Invoice Details Box (Right Column) - Enhanced positioning
+  // Invoice Details (Right) - Compact
   pdf.setFillColor(41, 98, 255);
-  pdf.rect(rightColX, yPos, rightColWidth, 80, 'F');
+  pdf.rect(rightColX, yPos, rightColWidth, 55, 'F');
   
   pdf.setTextColor(255, 255, 255);
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(10);
-  pdf.text("INVOICE DETAILS", rightColX + 5, yPos + 12);
+  pdf.setFontSize(8);
+  pdf.text("INVOICE DETAILS", rightColX + 3, yPos + 8);
   
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(9);
-  pdf.text("Invoice No:", rightColX + 5, yPos + 25);
+  pdf.setFontSize(7);
+  pdf.text("Invoice No:", rightColX + 3, yPos + 18);
   pdf.setFont("helvetica", "bold");
-  pdf.text(formData.invoiceNumber, rightColX + 5, yPos + 33);
+  pdf.setFontSize(8);
+  pdf.text(formData.invoiceNumber, rightColX + 3, yPos + 25);
   
   pdf.setFont("helvetica", "normal");
-  pdf.text("Date:", rightColX + 5, yPos + 45);
+  pdf.setFontSize(7);
+  pdf.text("Date:", rightColX + 3, yPos + 35);
   pdf.setFont("helvetica", "bold");
-  pdf.text(new Date(formData.invoiceDate).toLocaleDateString('en-IN'), rightColX + 5, yPos + 53);
+  pdf.setFontSize(8);
+  pdf.text(new Date(formData.invoiceDate).toLocaleDateString('en-IN'), rightColX + 3, yPos + 42);
   
   if (formData.dueDate) {
     pdf.setFont("helvetica", "normal");
-    pdf.text("Due Date:", rightColX + 5, yPos + 65);
+    pdf.setFontSize(7);
+    pdf.text("Due Date:", rightColX + 3, yPos + 50);
     pdf.setFont("helvetica", "bold");
-    pdf.text(new Date(formData.dueDate).toLocaleDateString('en-IN'), rightColX + 5, yPos + 73);
+    pdf.setFontSize(8);
+    pdf.text(new Date(formData.dueDate).toLocaleDateString('en-IN'), rightColX + 3, yPos + 57);
   }
 
-  // Client Information Section (Full width below)
-  yPos += 90;
+  // Client Information - Compact
+  yPos += 60;
   pdf.setTextColor(0, 0, 0);
-  pdf.setFillColor(252, 252, 252);
-  pdf.rect(margin, yPos, pageWidth - 2 * margin, 65, 'F');
-  pdf.setDrawColor(230, 230, 230);
-  pdf.rect(margin, yPos, pageWidth - 2 * margin, 65);
+  pdf.setFillColor(248, 248, 248);
+  pdf.rect(margin, yPos, pageWidth - 2 * margin, 45, 'F');
+  pdf.setDrawColor(220, 220, 220);
+  pdf.rect(margin, yPos, pageWidth - 2 * margin, 45);
 
+  pdf.setFontSize(9);
+  pdf.setFont("helvetica", "bold");
+  pdf.text("BILL TO:", margin + 3, yPos + 8);
+  
   pdf.setFontSize(11);
   pdf.setFont("helvetica", "bold");
-  pdf.text("BILL TO:", margin + 5, yPos + 12);
-  
-  pdf.setFontSize(14);
-  pdf.setFont("helvetica", "bold");
-  pdf.text(formData.clientName.toUpperCase(), margin + 5, yPos + 25);
+  pdf.text(formData.clientName.toUpperCase(), margin + 3, yPos + 17);
   
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   if (formData.clientGstin) {
-    pdf.text(`GSTIN: ${formData.clientGstin}`, margin + 5, yPos + 35);
+    pdf.text(`GSTIN: ${formData.clientGstin}`, margin + 3, yPos + 25);
   }
   
   const clientAddressLines = formData.clientAddress.split('\n');
-  let clientYPos = yPos + (formData.clientGstin ? 45 : 35);
+  let clientYPos = yPos + (formData.clientGstin ? 32 : 25);
   clientAddressLines.forEach((line) => {
-    if (line.trim() && clientYPos < yPos + 60) {
-      pdf.text(line.trim(), margin + 5, clientYPos);
-      clientYPos += 8;
+    if (line.trim() && clientYPos < yPos + 42) {
+      pdf.text(line.trim(), margin + 3, clientYPos);
+      clientYPos += 6;
     }
   });
 
-  // Items Table - Full width utilization
-  yPos += 75;
+  // Items Table - Compact
+  yPos += 50;
   const tableWidth = pageWidth - 2 * margin;
   const colWidths = {
     description: tableWidth * 0.45,
@@ -126,142 +131,142 @@ export const generateInvoicePDF = async (
     amount: tableWidth * 0.24
   };
 
-  // Table header with enhanced styling
+  // Compact table header
   pdf.setFillColor(41, 98, 255);
-  pdf.rect(margin, yPos, tableWidth, 18, 'F');
+  pdf.rect(margin, yPos, tableWidth, 14, 'F');
   
   pdf.setTextColor(255, 255, 255);
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(10);
-  pdf.text("DESCRIPTION", margin + 3, yPos + 12);
-  pdf.text("QTY", margin + colWidths.description + 3, yPos + 12);
-  pdf.text("RATE (₹)", margin + colWidths.description + colWidths.qty + 3, yPos + 12);
-  pdf.text("GST%", margin + colWidths.description + colWidths.qty + colWidths.rate + 3, yPos + 12);
-  pdf.text("AMOUNT (₹)", margin + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 3, yPos + 12);
+  pdf.setFontSize(8);
+  pdf.text("DESCRIPTION", margin + 2, yPos + 9);
+  pdf.text("QTY", margin + colWidths.description + 2, yPos + 9);
+  pdf.text("RATE (₹)", margin + colWidths.description + colWidths.qty + 2, yPos + 9);
+  pdf.text("GST%", margin + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 9);
+  pdf.text("AMOUNT (₹)", margin + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 2, yPos + 9);
 
-  // Table content with proper spacing
-  yPos += 18;
+  // Table content - Compact rows
+  yPos += 14;
   pdf.setTextColor(0, 0, 0);
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   
   formData.items.forEach((item, index) => {
-    if (yPos > pageHeight - 100) {
+    if (yPos > pageHeight - 80) {
       pdf.addPage();
       yPos = 30;
     }
     
-    // Alternate row background
+    // Minimal row background
     if (index % 2 === 0) {
-      pdf.setFillColor(250, 250, 250);
-      pdf.rect(margin, yPos, tableWidth, 16, 'F');
+      pdf.setFillColor(252, 252, 252);
+      pdf.rect(margin, yPos, tableWidth, 12, 'F');
     }
     
-    // Draw row borders
-    pdf.setDrawColor(230, 230, 230);
-    pdf.rect(margin, yPos, tableWidth, 16);
+    // Thin row borders
+    pdf.setDrawColor(240, 240, 240);
+    pdf.rect(margin, yPos, tableWidth, 12);
     
-    // Item details with proper alignment
-    const description = item.description.length > 35 ? 
-      item.description.substring(0, 35) + '...' : item.description;
+    // Compact item details
+    const description = item.description.length > 40 ? 
+      item.description.substring(0, 40) + '...' : item.description;
     
-    pdf.text(description, margin + 3, yPos + 10);
-    pdf.text(item.quantity.toString(), margin + colWidths.description + 8, yPos + 10, { align: "center" });
-    pdf.text(item.rate.toFixed(2), margin + colWidths.description + colWidths.qty + 15, yPos + 10, { align: "right" });
-    pdf.text(`${item.gstRate}%`, margin + colWidths.description + colWidths.qty + colWidths.rate + 15, yPos + 10, { align: "center" });
-    pdf.text(item.totalAmount.toFixed(2), margin + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 40, yPos + 10, { align: "right" });
+    pdf.text(description, margin + 2, yPos + 8);
+    pdf.text(item.quantity.toString(), margin + colWidths.description + 6, yPos + 8, { align: "center" });
+    pdf.text(item.rate.toFixed(2), margin + colWidths.description + colWidths.qty + 12, yPos + 8, { align: "right" });
+    pdf.text(`${item.gstRate}%`, margin + colWidths.description + colWidths.qty + colWidths.rate + 12, yPos + 8, { align: "center" });
+    pdf.text(item.totalAmount.toFixed(2), margin + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 35, yPos + 8, { align: "right" });
     
-    yPos += 16;
+    yPos += 12;
   });
 
-  // Summary Section - Enhanced layout
-  yPos += 15;
-  const summaryWidth = 120;
+  // Compact Summary Section
+  yPos += 8;
+  const summaryWidth = 100;
   const summaryX = pageWidth - summaryWidth - margin;
   
-  pdf.setFillColor(248, 250, 252);
-  const summaryHeight = summary.isInterstate ? 70 : 85;
+  pdf.setFillColor(250, 250, 250);
+  const summaryHeight = summary.isInterstate ? 50 : 62;
   pdf.rect(summaryX, yPos, summaryWidth, summaryHeight, 'F');
-  pdf.setDrawColor(200, 200, 200);
+  pdf.setDrawColor(220, 220, 220);
   pdf.rect(summaryX, yPos, summaryWidth, summaryHeight);
   
-  pdf.setFontSize(10);
+  pdf.setFontSize(8);
   pdf.setFont("helvetica", "normal");
   
-  let summaryYPos = yPos + 15;
-  pdf.text("Subtotal:", summaryX + 10, summaryYPos);
-  pdf.text(`₹${summary.subtotal.toFixed(2)}`, summaryX + summaryWidth - 15, summaryYPos, { align: "right" });
-  summaryYPos += 12;
+  let summaryYPos = yPos + 10;
+  pdf.text("Subtotal:", summaryX + 5, summaryYPos);
+  pdf.text(`₹${summary.subtotal.toFixed(2)}`, summaryX + summaryWidth - 8, summaryYPos, { align: "right" });
+  summaryYPos += 10;
   
   if (summary.isInterstate) {
-    pdf.text("IGST:", summaryX + 10, summaryYPos);
-    pdf.text(`₹${summary.igst.toFixed(2)}`, summaryX + summaryWidth - 15, summaryYPos, { align: "right" });
-    summaryYPos += 12;
+    pdf.text("IGST:", summaryX + 5, summaryYPos);
+    pdf.text(`₹${summary.igst.toFixed(2)}`, summaryX + summaryWidth - 8, summaryYPos, { align: "right" });
+    summaryYPos += 10;
   } else {
-    pdf.text("CGST:", summaryX + 10, summaryYPos);
-    pdf.text(`₹${summary.cgst.toFixed(2)}`, summaryX + summaryWidth - 15, summaryYPos, { align: "right" });
-    summaryYPos += 12;
-    pdf.text("SGST:", summaryX + 10, summaryYPos);
-    pdf.text(`₹${summary.sgst.toFixed(2)}`, summaryX + summaryWidth - 15, summaryYPos, { align: "right" });
-    summaryYPos += 12;
+    pdf.text("CGST:", summaryX + 5, summaryYPos);
+    pdf.text(`₹${summary.cgst.toFixed(2)}`, summaryX + summaryWidth - 8, summaryYPos, { align: "right" });
+    summaryYPos += 10;
+    pdf.text("SGST:", summaryX + 5, summaryYPos);
+    pdf.text(`₹${summary.sgst.toFixed(2)}`, summaryX + summaryWidth - 8, summaryYPos, { align: "right" });
+    summaryYPos += 10;
   }
   
-  // Total amount with enhanced styling
+  // Compact total
   pdf.setFillColor(41, 98, 255);
-  pdf.rect(summaryX, summaryYPos - 5, summaryWidth, 20, 'F');
+  pdf.rect(summaryX, summaryYPos - 2, summaryWidth, 15, 'F');
   pdf.setTextColor(255, 255, 255);
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(12);
-  pdf.text("TOTAL:", summaryX + 10, summaryYPos + 8);
-  pdf.text(`₹${summary.total.toFixed(2)}`, summaryX + summaryWidth - 15, summaryYPos + 8, { align: "right" });
+  pdf.setFontSize(10);
+  pdf.text("TOTAL:", summaryX + 5, summaryYPos + 8);
+  pdf.text(`₹${summary.total.toFixed(2)}`, summaryX + summaryWidth - 8, summaryYPos + 8, { align: "right" });
   
   pdf.setTextColor(0, 0, 0);
   
-  // Amount in words - Enhanced positioning
-  yPos = Math.max(yPos + summaryHeight + 20, summaryYPos + 30);
-  pdf.setFontSize(10);
+  // Compact amount in words
+  yPos = Math.max(yPos + summaryHeight + 12, summaryYPos + 20);
+  pdf.setFontSize(8);
   pdf.setFont("helvetica", "italic");
   const amountInWords = numberToWords(Math.floor(summary.total));
   const wordsText = `Amount in words: ${amountInWords.charAt(0).toUpperCase() + amountInWords.slice(1)} rupees only`;
   
-  pdf.setFillColor(252, 252, 252);
-  pdf.rect(margin, yPos, pageWidth - 2 * margin, 20, 'F');
+  pdf.setFillColor(248, 248, 248);
+  pdf.rect(margin, yPos, pageWidth - 2 * margin, 15, 'F');
   pdf.setDrawColor(230, 230, 230);
-  pdf.rect(margin, yPos, pageWidth - 2 * margin, 20);
+  pdf.rect(margin, yPos, pageWidth - 2 * margin, 15);
   
-  const splitText = pdf.splitTextToSize(wordsText, pageWidth - 2 * margin - 10);
-  pdf.text(splitText, margin + 5, yPos + 12);
-  yPos += 25;
+  const splitText = pdf.splitTextToSize(wordsText, pageWidth - 2 * margin - 6);
+  pdf.text(splitText, margin + 3, yPos + 9);
+  yPos += 18;
   
-  // Notes section - Enhanced if present
+  // Compact notes if present
   if (formData.notes && formData.notes.trim()) {
-    pdf.setFontSize(10);
+    pdf.setFontSize(8);
     pdf.setFont("helvetica", "bold");
     pdf.text("NOTES:", margin, yPos);
-    yPos += 12;
+    yPos += 8;
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(9);
+    pdf.setFontSize(7);
     
-    pdf.setFillColor(252, 252, 252);
-    const notesHeight = Math.min(30, (formData.notes.length / 80) * 8 + 10);
+    const notesHeight = 20;
+    pdf.setFillColor(248, 248, 248);
     pdf.rect(margin, yPos, pageWidth - 2 * margin, notesHeight, 'F');
     
-    const notesSplit = pdf.splitTextToSize(formData.notes.trim(), pageWidth - 2 * margin - 10);
-    pdf.text(notesSplit, margin + 5, yPos + 8);
-    yPos += notesHeight + 10;
+    const notesSplit = pdf.splitTextToSize(formData.notes.trim(), pageWidth - 2 * margin - 6);
+    pdf.text(notesSplit, margin + 3, yPos + 6);
+    yPos += notesHeight + 5;
   }
   
-  // Professional footer
-  const footerY = pageHeight - 12;
-  pdf.setDrawColor(220, 220, 220);
-  pdf.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
+  // Minimal footer
+  const footerY = pageHeight - 10;
+  pdf.setDrawColor(230, 230, 230);
+  pdf.line(margin, footerY - 3, pageWidth - margin, footerY - 3);
   
-  pdf.setFontSize(8);
+  pdf.setFontSize(7);
   pdf.setFont("helvetica", "normal");
-  pdf.setTextColor(100, 100, 100);
-  pdf.text("This is a computer generated invoice.", pageWidth / 2, footerY, { align: "center" });
+  pdf.setTextColor(120, 120, 120);
+  pdf.text("Computer generated invoice.", pageWidth / 2, footerY, { align: "center" });
   
-  // Download with professional naming
+  // Download
   const fileName = `Invoice_${formData.invoiceNumber}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
   pdf.save(fileName);
 };
