@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { History, Search, Download, Eye, Edit, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const InvoiceHistory = () => {
-  // This will be populated with actual generated invoices
-  const generatedInvoices: any[] = [];
+  const [invoices, setInvoices] = useState<any[]>([]);
   
-  // For demonstration - this would come from actual generated invoice data
-  const mockInvoices = generatedInvoices.length > 0 ? generatedInvoices : [];
+  useEffect(() => {
+    // Load invoices from localStorage
+    const storedInvoices = JSON.parse(localStorage.getItem('invoiceHistory') || '[]');
+    setInvoices(storedInvoices);
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -63,7 +66,7 @@ const InvoiceHistory = () => {
             <CardTitle>Generated Invoices</CardTitle>
           </CardHeader>
           <CardContent>
-            {mockInvoices.length === 0 ? (
+            {invoices.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-muted-foreground mb-4">
                   <History className="w-16 h-16 mx-auto mb-4 opacity-50" />
@@ -87,12 +90,12 @@ const InvoiceHistory = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {mockInvoices.map((invoice) => (
+                    {invoices.map((invoice) => (
                       <tr key={invoice.id} className="border-b border-border hover:bg-accent/50">
                         <td className="py-4 px-2 font-medium">{invoice.id}</td>
-                        <td className="py-4 px-2">{invoice.client}</td>
-                        <td className="py-4 px-2 text-muted-foreground">{invoice.date}</td>
-                        <td className="py-4 px-2 font-medium">₹{invoice.amount.toLocaleString()}</td>
+                        <td className="py-4 px-2">{invoice.clientName}</td>
+                        <td className="py-4 px-2 text-muted-foreground">{new Date(invoice.date).toLocaleDateString()}</td>
+                        <td className="py-4 px-2 font-medium">₹{invoice.total.toLocaleString()}</td>
                         <td className="py-4 px-2">
                           <div className="flex items-center space-x-2">
                             <Button variant="ghost" size="sm" title="View Invoice">

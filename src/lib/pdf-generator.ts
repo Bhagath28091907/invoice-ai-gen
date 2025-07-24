@@ -58,7 +58,7 @@ export const generateInvoicePDF = async (
   });
 
   // Invoice Details (Right) - Compact
-  const invoiceBoxHeight = formData.dueDate ? 50 : 40;
+  const invoiceBoxHeight = formData.dueDate ? 40 : 32;
   pdf.setFillColor(41, 98, 255);
   pdf.rect(rightColX, yPos, rightColWidth, invoiceBoxHeight, 'F');
   
@@ -69,25 +69,25 @@ export const generateInvoicePDF = async (
   
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(6);
-  pdf.text("Invoice No:", rightColX + 2, yPos + 12);
+  pdf.text("Invoice No:", rightColX + 2, yPos + 11);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(7);
-  pdf.text(formData.invoiceNumber, rightColX + 2, yPos + 17);
+  pdf.text(formData.invoiceNumber, rightColX + 2, yPos + 15);
   
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(6);
-  pdf.text("Date:", rightColX + 2, yPos + 24);
+  pdf.text("Date:", rightColX + 2, yPos + 20);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(7);
-  pdf.text(new Date(formData.invoiceDate).toLocaleDateString('en-IN'), rightColX + 2, yPos + 29);
+  pdf.text(new Date(formData.invoiceDate).toLocaleDateString('en-IN'), rightColX + 2, yPos + 24);
   
   if (formData.dueDate) {
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(6);
-    pdf.text("Due Date:", rightColX + 2, yPos + 36);
+    pdf.text("Due Date:", rightColX + 2, yPos + 29);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(7);
-    pdf.text(new Date(formData.dueDate).toLocaleDateString('en-IN'), rightColX + 2, yPos + 41);
+    pdf.text(new Date(formData.dueDate).toLocaleDateString('en-IN'), rightColX + 2, yPos + 33);
   }
 
   // Client Information - Compact
@@ -266,6 +266,20 @@ export const generateInvoicePDF = async (
   pdf.setFont("helvetica", "normal");
   pdf.setTextColor(120, 120, 120);
   pdf.text("Computer generated invoice.", pageWidth / 2, footerY, { align: "center" });
+  
+  // Save to history before downloading
+  const invoiceData = {
+    id: formData.invoiceNumber,
+    clientName: formData.clientName,
+    date: formData.invoiceDate,
+    total: summary.total,
+    createdAt: new Date().toISOString()
+  };
+  
+  // Store in localStorage for history
+  const existingInvoices = JSON.parse(localStorage.getItem('invoiceHistory') || '[]');
+  const updatedInvoices = [invoiceData, ...existingInvoices];
+  localStorage.setItem('invoiceHistory', JSON.stringify(updatedInvoices));
   
   // Download
   const fileName = `Invoice_${formData.invoiceNumber}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
