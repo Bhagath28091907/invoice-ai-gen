@@ -14,17 +14,17 @@ export const generateInvoicePDF = async (
   const margin = 10; // Minimal margin for maximum space
   let yPos = 20;
 
-  // Compact Header
+  // Minimal Header
   pdf.setFillColor(41, 98, 255);
-  pdf.rect(0, 0, pageWidth, 22, 'F');
+  pdf.rect(0, 0, pageWidth, 16, 'F');
   
-  pdf.setFontSize(16);
+  pdf.setFontSize(12);
   pdf.setFont("helvetica", "bold");
   pdf.setTextColor(255, 255, 255);
-  pdf.text("TAX INVOICE", pageWidth / 2, 14, { align: "center" });
+  pdf.text("TAX INVOICE", pageWidth / 2, 11, { align: "center" });
   
   // Compact layout - using full width efficiently
-  yPos = 28;
+  yPos = 20;
   const leftColWidth = (pageWidth * 0.65) - margin;
   const rightColX = pageWidth * 0.68;
   const rightColWidth = (pageWidth * 0.32) - margin;
@@ -32,96 +32,96 @@ export const generateInvoicePDF = async (
   // Business Information (Left) - Compact
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(250, 250, 250);
-  pdf.rect(margin, yPos, leftColWidth, 55, 'F');
+  pdf.rect(margin, yPos, leftColWidth, 45, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, leftColWidth, 55);
+  pdf.rect(margin, yPos, leftColWidth, 45);
 
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
-  pdf.text("BILL FROM:", margin + 3, yPos + 8);
+  pdf.text("BILL FROM:", margin + 2, yPos + 6);
   
-  pdf.setFontSize(11);
+  pdf.setFontSize(10);
   pdf.setFont("helvetica", "bold");
-  pdf.text(formData.businessName.toUpperCase(), margin + 3, yPos + 17);
+  pdf.text(formData.businessName.toUpperCase(), margin + 2, yPos + 14);
   
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(8);
-  pdf.text(`GSTIN: ${formData.gstin}`, margin + 3, yPos + 25);
+  pdf.setFontSize(7);
+  pdf.text(`GSTIN: ${formData.gstin}`, margin + 2, yPos + 21);
   
   const businessAddressLines = formData.businessAddress.split('\n');
-  let businessYPos = yPos + 32;
+  let businessYPos = yPos + 27;
   businessAddressLines.forEach((line) => {
-    if (line.trim() && businessYPos < yPos + 50) {
-      pdf.text(line.trim(), margin + 3, businessYPos);
-      businessYPos += 6;
+    if (line.trim() && businessYPos < yPos + 42) {
+      pdf.text(line.trim(), margin + 2, businessYPos);
+      businessYPos += 5;
     }
   });
 
   // Invoice Details (Right) - Compact
   pdf.setFillColor(41, 98, 255);
-  pdf.rect(rightColX, yPos, rightColWidth, 55, 'F');
+  pdf.rect(rightColX, yPos, rightColWidth, 45, 'F');
   
   pdf.setTextColor(255, 255, 255);
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(8);
-  pdf.text("INVOICE DETAILS", rightColX + 3, yPos + 8);
+  pdf.setFontSize(7);
+  pdf.text("INVOICE DETAILS", rightColX + 2, yPos + 6);
   
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(7);
-  pdf.text("Invoice No:", rightColX + 3, yPos + 18);
+  pdf.setFontSize(6);
+  pdf.text("Invoice No:", rightColX + 2, yPos + 14);
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(8);
-  pdf.text(formData.invoiceNumber, rightColX + 3, yPos + 25);
+  pdf.setFontSize(7);
+  pdf.text(formData.invoiceNumber, rightColX + 2, yPos + 20);
   
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(7);
-  pdf.text("Date:", rightColX + 3, yPos + 35);
+  pdf.setFontSize(6);
+  pdf.text("Date:", rightColX + 2, yPos + 28);
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(8);
-  pdf.text(new Date(formData.invoiceDate).toLocaleDateString('en-IN'), rightColX + 3, yPos + 42);
+  pdf.setFontSize(7);
+  pdf.text(new Date(formData.invoiceDate).toLocaleDateString('en-IN'), rightColX + 2, yPos + 34);
   
   if (formData.dueDate) {
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(7);
-    pdf.text("Due Date:", rightColX + 3, yPos + 50);
+    pdf.setFontSize(6);
+    pdf.text("Due Date:", rightColX + 2, yPos + 40);
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(8);
-    pdf.text(new Date(formData.dueDate).toLocaleDateString('en-IN'), rightColX + 3, yPos + 57);
+    pdf.setFontSize(7);
+    pdf.text(new Date(formData.dueDate).toLocaleDateString('en-IN'), rightColX + 2, yPos + 46);
   }
 
   // Client Information - Compact
-  yPos += 60;
+  yPos += 50;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
-  pdf.rect(margin, yPos, pageWidth - 2 * margin, 45, 'F');
+  pdf.rect(margin, yPos, pageWidth - 2 * margin, 35, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, pageWidth - 2 * margin, 45);
+  pdf.rect(margin, yPos, pageWidth - 2 * margin, 35);
 
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
-  pdf.text("BILL TO:", margin + 3, yPos + 8);
+  pdf.text("BILL TO:", margin + 2, yPos + 6);
   
-  pdf.setFontSize(11);
+  pdf.setFontSize(10);
   pdf.setFont("helvetica", "bold");
-  pdf.text(formData.clientName.toUpperCase(), margin + 3, yPos + 17);
+  pdf.text(formData.clientName.toUpperCase(), margin + 2, yPos + 14);
   
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(8);
+  pdf.setFontSize(7);
   if (formData.clientGstin) {
-    pdf.text(`GSTIN: ${formData.clientGstin}`, margin + 3, yPos + 25);
+    pdf.text(`GSTIN: ${formData.clientGstin}`, margin + 2, yPos + 21);
   }
   
   const clientAddressLines = formData.clientAddress.split('\n');
-  let clientYPos = yPos + (formData.clientGstin ? 32 : 25);
+  let clientYPos = yPos + (formData.clientGstin ? 26 : 20);
   clientAddressLines.forEach((line) => {
-    if (line.trim() && clientYPos < yPos + 42) {
-      pdf.text(line.trim(), margin + 3, clientYPos);
-      clientYPos += 6;
+    if (line.trim() && clientYPos < yPos + 32) {
+      pdf.text(line.trim(), margin + 2, clientYPos);
+      clientYPos += 4;
     }
   });
 
   // Items Table - Compact
-  yPos += 50;
+  yPos += 40;
   const tableWidth = pageWidth - 2 * margin;
   const colWidths = {
     description: tableWidth * 0.45,
