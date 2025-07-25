@@ -12,7 +12,7 @@ const Upgrade = () => {
   const { user, credits, isUnlimited, refreshCredits } = useAuth();
   const { toast } = useToast();
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = () => {
     if (!user) {
       toast({
         title: "Error",
@@ -22,69 +22,8 @@ const Upgrade = () => {
       return;
     }
 
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
-        body: {
-          amount: 10000, // 100 INR in paise
-          currency: 'INR',
-        },
-      });
-
-      if (error) throw error;
-
-      // Initialize Razorpay
-      const options = {
-        key: 'rzp_test_your_key_here', // You'll need to provide your Razorpay key
-        amount: data.amount,
-        currency: data.currency,
-        name: 'Invoice Generator',
-        description: 'Annual Unlimited Plan',
-        order_id: data.id,
-        handler: async (response: any) => {
-          try {
-            // Verify payment and update subscription
-            await supabase.functions.invoke('verify-payment', {
-              body: {
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature,
-              },
-            });
-
-            await refreshCredits();
-            toast({
-              title: "Success!",
-              description: "You now have unlimited invoice generations!",
-            });
-          } catch (error: any) {
-            toast({
-              title: "Payment Error",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
-        },
-        prefill: {
-          email: user.email,
-        },
-        theme: {
-          color: '#3B82F6',
-        },
-      };
-
-      // @ts-ignore
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    // Redirect to Razorpay payment page
+    window.open('https://rzp.io/rzp/6TpaWgbi', '_blank');
   };
 
   return (
