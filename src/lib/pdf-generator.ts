@@ -3,11 +3,13 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { InvoiceFormData, InvoiceSummary } from "@/types/invoice";
 import { numberToWords } from "./invoice-calculations";
+import { supabase } from "@/integrations/supabase/client";
 
 export const generateInvoicePDF = async (
   formData: InvoiceFormData,
-  summary: InvoiceSummary
-): Promise<void> => {
+  summary: InvoiceSummary,
+  userId?: string
+): Promise<boolean> => {
   const pdf = new jsPDF();
   const pageWidth = pdf.internal.pageSize.width;
   const pageHeight = pdf.internal.pageSize.height;
@@ -267,21 +269,48 @@ export const generateInvoicePDF = async (
   pdf.setTextColor(120, 120, 120);
   pdf.text("Computer generated invoice.", pageWidth / 2, footerY, { align: "center" });
   
-  // Save to history before downloading
-  const invoiceData = {
-    id: formData.invoiceNumber,
-    clientName: formData.clientName,
-    date: formData.invoiceDate,
-    total: summary.total,
-    createdAt: new Date().toISOString()
-  };
-  
-  // Store in localStorage for history
-  const existingInvoices = JSON.parse(localStorage.getItem('invoiceHistory') || '[]');
-  const updatedInvoices = [invoiceData, ...existingInvoices];
-  localStorage.setItem('invoiceHistory', JSON.stringify(updatedInvoices));
-  
-  // Download
-  const fileName = `Invoice_${formData.invoiceNumber}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-  pdf.save(fileName);
+  try {
+    // Save to database if user is logged in
+    if (userId) {
+      await supabase.from('invoices').insert({
+        user_id: userId,
+        invoice_number: formData.invoiceNumber,
+        business_name: formData.businessName,
+        client_name: formData.clientName,
+        total_amount: summary.total,
+        invoice_data: JSON.parse(JSON.stringify({
+          formData,
+          summary,
+          createdAt: new Date().toISOString()
+        }))
+      });
+    }
+
+    // Also store in localStorage for backward compatibility
+    const invoiceData = {
+      id: formData.invoiceNumber,
+      clientName: formData.clientName,
+      date: formData.invoiceDate,
+      total: summary.total,
+      createdAt: new Date().toISOString()
+    };
+    
+    const existingInvoices = JSON.parse(localStorage.getItem('invoiceHistory') || '[]');
+    const updatedInvoices = [invoiceData, ...existingInvoices];
+    localStorage.setItem('invoiceHistory', JSON.stringify(updatedInvoices));
+    
+    // Download
+    const fileName = `Invoice_${formData.invoiceNumber}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    pdf.save(fileName);
+    
+    return true;
+  } catch (error) {
+    console.error('Error saving invoice:', error);
+    
+    // Still download the PDF even if saving fails
+    const fileName = `Invoice_${formData.invoiceNumber}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    pdf.save(fileName);
+    
+    return false;
+  }
 };

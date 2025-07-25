@@ -6,36 +6,59 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import CreateInvoice from "./pages/CreateInvoice";
 import InvoiceHistory from "./pages/InvoiceHistory";
-
+import Auth from "./pages/Auth";
+import Upgrade from "./pages/Upgrade";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Header from "./components/Header";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/create" element={<CreateInvoice />} />
+          <Route path="/history" element={<InvoiceHistory />} />
+          <Route path="/upgrade" element={<Upgrade />} />
+          <Route path="/about" element={<About />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+    </div>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <div className="min-h-screen flex flex-col">
-          <Header />
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/create" element={<CreateInvoice />} />
-              <Route path="/history" element={<InvoiceHistory />} />
-              
-              <Route path="/about" element={<About />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          
-        </div>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

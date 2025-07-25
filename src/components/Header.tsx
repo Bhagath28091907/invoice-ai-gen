@@ -1,9 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { FileText, Calculator, History, Info } from "lucide-react";
+import { FileText, Calculator, History, Info, LogOut, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import CreditsDisplay from "./CreditsDisplay";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const navigation = [
     { name: "Home", href: "/", icon: FileText },
@@ -25,30 +34,55 @@ const Header = () => {
           </Link>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.href;
-              
-              return (
-                <Link key={item.name} to={item.href}>
-                  <Button
-                    variant={isActive ? "default" : "ghost"}
-                    size="sm"
-                    className="flex items-center space-x-2"
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{item.name}</span>
-                  </Button>
-                </Link>
-              );
-            })}
-          </nav>
+          <div className="flex items-center space-x-4">
+            <nav className="hidden md:flex items-center space-x-1">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.href;
+                
+                return (
+                  <Link key={item.name} to={item.href}>
+                    <Button
+                      variant={isActive ? "default" : "ghost"}
+                      size="sm"
+                      className="flex items-center space-x-2"
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{item.name}</span>
+                    </Button>
+                  </Link>
+                );
+              })}
+            </nav>
 
-          {/* Mobile menu button */}
-          <Button variant="ghost" size="sm" className="md:hidden">
-            <FileText className="w-5 h-5" />
-          </Button>
+            {/* Credits Display */}
+            <div className="hidden md:block">
+              <CreditsDisplay />
+            </div>
+
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <User className="w-4 h-4" />
+                  <span className="ml-2 hidden sm:inline">
+                    {user?.email?.split('@')[0] || 'User'}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={signOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Mobile menu button */}
+            <Button variant="ghost" size="sm" className="md:hidden">
+              <FileText className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </div>
     </header>

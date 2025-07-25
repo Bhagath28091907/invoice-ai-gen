@@ -10,6 +10,10 @@ import { ItemsForm } from "@/components/invoice/ItemsForm";
 import { InvoiceSummary } from "@/components/invoice/InvoiceSummary";
 import { InvoiceFormData, InvoiceItem } from "@/types/invoice";
 import { calculateInvoiceSummary } from "@/lib/invoice-calculations";
+import { generateInvoicePDF } from "@/lib/pdf-generator";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const invoiceSchema = z.object({
   businessName: z.string().min(1, "Business name is required"),
@@ -28,6 +32,8 @@ const invoiceSchema = z.object({
 });
 
 const CreateInvoice = () => {
+  const { user, credits, isUnlimited, refreshCredits } = useAuth();
+  const { toast } = useToast();
   const [items, setItems] = useState<InvoiceItem[]>([
     {
       id: `item-${Date.now()}`,
@@ -78,7 +84,49 @@ const CreateInvoice = () => {
   // Check if form is valid for PDF generation
   const canGeneratePDF = isValid && items.length > 0 && items.some(item => 
     item.description && item.quantity > 0 && item.rate > 0
-  );
+  ) && (isUnlimited || (credits && credits > 0));
+
+  const handleGeneratePDF = async () => {
+    if (!canGeneratePDF) return;
+    
+    if (!isUnlimited && (!credits || credits <= 0)) {
+      toast({
+        title: "No credits remaining",
+        description: "Please upgrade to continue generating invoices",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const success = await generateInvoicePDF(
+        { ...watchedValues, items },
+        summary,
+        user?.id
+      );
+
+      if (success && !isUnlimited) {
+        // Deduct credit
+        await supabase
+          .from('user_credits')
+          .update({ credits_remaining: credits! - 1 })
+          .eq('user_id', user!.id);
+        
+        await refreshCredits();
+      }
+
+      toast({
+        title: "Invoice generated successfully!",
+        description: "Your invoice has been downloaded",
+      });
+    } catch (error) {
+      toast({
+        title: "Error generating invoice",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
