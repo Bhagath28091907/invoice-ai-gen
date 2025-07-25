@@ -14,7 +14,141 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      invoices: {
+        Row: {
+          business_name: string
+          client_name: string
+          created_at: string
+          id: string
+          invoice_data: Json
+          invoice_number: string
+          total_amount: number
+          user_id: string
+        }
+        Insert: {
+          business_name: string
+          client_name: string
+          created_at?: string
+          id?: string
+          invoice_data: Json
+          invoice_number: string
+          total_amount: number
+          user_id: string
+        }
+        Update: {
+          business_name?: string
+          client_name?: string
+          created_at?: string
+          id?: string
+          invoice_data?: Json
+          invoice_number?: string
+          total_amount?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          expires_at: string
+          id: string
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          status: string
+          subscription_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          expires_at: string
+          id?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          status?: string
+          subscription_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          expires_at?: string
+          id?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          status?: string
+          subscription_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_credits: {
+        Row: {
+          created_at: string
+          credits_remaining: number
+          id: string
+          is_unlimited: boolean
+          total_credits_purchased: number
+          unlimited_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_remaining?: number
+          id?: string
+          is_unlimited?: boolean
+          total_credits_purchased?: number
+          unlimited_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_remaining?: number
+          id?: string
+          is_unlimited?: boolean
+          total_credits_purchased?: number
+          unlimited_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
