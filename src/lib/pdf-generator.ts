@@ -196,7 +196,7 @@ export const generateInvoicePDF = async (
   const summaryX = pageWidth - summaryWidth - margin;
   
   pdf.setFillColor(250, 250, 250);
-  const summaryHeight = summary.isInterstate ? 80 : 92; // Increased height for signature
+  const summaryHeight = summary.isInterstate ? 75 : 87; // Decreased height by 5px
   pdf.rect(summaryX, yPos, summaryWidth, summaryHeight, 'F');
   pdf.setDrawColor(220, 220, 220);
   pdf.rect(summaryX, yPos, summaryWidth, summaryHeight);
