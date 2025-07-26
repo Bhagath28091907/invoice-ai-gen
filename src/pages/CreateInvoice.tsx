@@ -17,11 +17,9 @@ import { useToast } from "@/hooks/use-toast";
 
 const invoiceSchema = z.object({
   businessName: z.string().min(1, "Business name is required"),
-  gstin: z.string().min(1, "GSTIN is required"),
   businessAddress: z.string().min(1, "Business address is required"),
   businessState: z.string().min(1, "Business state is required"),
   clientName: z.string().min(1, "Client name is required"),
-  clientGstin: z.string().optional(),
   clientAddress: z.string().min(1, "Client address is required"),
   clientState: z.string().min(1, "Client state is required"),
   invoiceNumber: z.string().min(1, "Invoice number is required"),
@@ -51,11 +49,9 @@ const CreateInvoice = () => {
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
       businessName: "",
-      gstin: "",
       businessAddress: "",
       businessState: "",
       clientName: "",
-      clientGstin: "",
       clientAddress: "",
       clientState: "",
       invoiceNumber: "",
@@ -100,7 +96,7 @@ const CreateInvoice = () => {
     });
     
     // More detailed validation checks
-    const requiredFields = ['businessName', 'gstin', 'businessAddress', 'businessState', 'clientName', 'clientAddress', 'clientState', 'invoiceNumber', 'invoiceDate'];
+    const requiredFields = ['businessName', 'businessAddress', 'businessState', 'clientName', 'clientAddress', 'clientState', 'invoiceNumber', 'invoiceDate'];
     const missingFields = requiredFields.filter(field => !watchedValues[field as keyof typeof watchedValues]);
     const validItems = items.filter(item => item.description && item.quantity > 0 && item.rate > 0);
     

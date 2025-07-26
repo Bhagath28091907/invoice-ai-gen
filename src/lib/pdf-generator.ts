@@ -48,19 +48,18 @@ export const generateInvoicePDF = async (
   
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
-  pdf.text(`GSTIN: ${formData.gstin}`, margin + 2, yPos + 21);
   
   const businessAddressLines = formData.businessAddress.split('\n');
-  let businessYPos = yPos + 25;
+  let businessYPos = yPos + 18;
   businessAddressLines.forEach((line) => {
-    if (line.trim() && businessYPos < yPos + 32) {
+    if (line.trim() && businessYPos < yPos + 28) {
       pdf.text(line.trim(), margin + 2, businessYPos);
       businessYPos += 3;
     }
   });
 
   // Invoice Details (Right) - Compact
-  const invoiceBoxHeight = formData.dueDate ? 35 : 28;
+  const invoiceBoxHeight = formData.dueDate ? 28 : 22;
   pdf.setFillColor(41, 98, 255);
   pdf.rect(rightColX, yPos, rightColWidth, invoiceBoxHeight, 'F');
   
@@ -93,12 +92,12 @@ export const generateInvoicePDF = async (
   }
 
   // Client Information - Compact
-  yPos += 40;
+  yPos += 32;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
-  pdf.rect(margin, yPos, pageWidth - 2 * margin, 28, 'F');
+  pdf.rect(margin, yPos, pageWidth - 2 * margin, 22, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, pageWidth - 2 * margin, 28);
+  pdf.rect(margin, yPos, pageWidth - 2 * margin, 22);
 
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
@@ -110,21 +109,18 @@ export const generateInvoicePDF = async (
   
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
-  if (formData.clientGstin) {
-    pdf.text(`GSTIN: ${formData.clientGstin}`, margin + 2, yPos + 21);
-  }
   
   const clientAddressLines = formData.clientAddress.split('\n');
-  let clientYPos = yPos + (formData.clientGstin ? 23 : 18);
+  let clientYPos = yPos + 18;
   clientAddressLines.forEach((line) => {
-    if (line.trim() && clientYPos < yPos + 26) {
+    if (line.trim() && clientYPos < yPos + 20) {
       pdf.text(line.trim(), margin + 2, clientYPos);
       clientYPos += 3;
     }
   });
 
   // Items Table - Compact
-  yPos += 32;
+  yPos += 26;
   const tableWidth = pageWidth - 2 * margin;
   const colWidths = {
     serial: tableWidth * 0.08,

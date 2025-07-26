@@ -57,23 +57,13 @@ export const BusinessInformationForm = ({ register, setValue, watch }: BusinessI
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="businessName">Business Name *</Label>
-            <Input 
-              id="businessName" 
-              placeholder="Enter business name" 
-              {...register("businessName", { required: true })}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="gstin">GSTIN *</Label>
-            <Input 
-              id="gstin" 
-              placeholder="22AAAAA0000A1Z5" 
-              {...register("gstin", { required: true })}
-            />
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="businessName">Business Name *</Label>
+          <Input 
+            id="businessName" 
+            placeholder="Enter business name" 
+            {...register("businessName", { required: true })}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="businessAddress">Business Address *</Label>

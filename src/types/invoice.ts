@@ -12,13 +12,11 @@ export interface InvoiceItem {
 export interface InvoiceFormData {
   // Business Information
   businessName: string;
-  gstin: string;
   businessAddress: string;
   businessState: string;
   
   // Client Information
   clientName: string;
-  clientGstin?: string;
   clientAddress: string;
   clientState: string;
   
