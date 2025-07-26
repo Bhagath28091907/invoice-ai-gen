@@ -58,8 +58,8 @@ export const generateInvoicePDF = async (
     }
   });
 
-  // Invoice Details (Right) - Compact
-  const invoiceBoxHeight = formData.dueDate ? 40 : 32;
+  // Invoice Details (Right) - Ensure all content fits in blue box
+  const invoiceBoxHeight = formData.dueDate ? 45 : 35;
   pdf.setFillColor(41, 98, 255);
   pdf.rect(rightColX, yPos, rightColWidth, invoiceBoxHeight, 'F');
   
@@ -70,25 +70,25 @@ export const generateInvoicePDF = async (
   
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(6);
-  pdf.text("Invoice No:", rightColX + 2, yPos + 11);
+  pdf.text("Invoice No:", rightColX + 2, yPos + 12);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(7);
-  pdf.text(formData.invoiceNumber, rightColX + 2, yPos + 15);
+  pdf.text(formData.invoiceNumber, rightColX + 2, yPos + 16);
   
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(6);
-  pdf.text("Date:", rightColX + 2, yPos + 20);
+  pdf.text("Date:", rightColX + 2, yPos + 22);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(7);
-  pdf.text(new Date(formData.invoiceDate).toLocaleDateString('en-IN'), rightColX + 2, yPos + 24);
+  pdf.text(new Date(formData.invoiceDate).toLocaleDateString('en-IN'), rightColX + 2, yPos + 26);
   
   if (formData.dueDate) {
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(6);
-    pdf.text("Due Date:", rightColX + 2, yPos + 29);
+    pdf.text("Due Date:", rightColX + 2, yPos + 32);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(7);
-    pdf.text(new Date(formData.dueDate).toLocaleDateString('en-IN'), rightColX + 2, yPos + 33);
+    pdf.text(new Date(formData.dueDate).toLocaleDateString('en-IN'), rightColX + 2, yPos + 36);
   }
 
   // Client Information - Compact
