@@ -92,7 +92,7 @@ export const generateInvoicePDF = async (
   }
 
   // Client Information - Compact
-  yPos += 32;
+  yPos += invoiceBoxHeight + 8;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
   pdf.rect(margin, yPos, pageWidth - 2 * margin, 22, 'F');
