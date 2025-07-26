@@ -95,9 +95,9 @@ export const generateInvoicePDF = async (
   yPos += invoiceBoxHeight + 8;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
-  pdf.rect(margin, yPos, pageWidth - 2 * margin, 22, 'F');
+  pdf.rect(margin, yPos, leftColWidth, 22, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, pageWidth - 2 * margin, 22);
+  pdf.rect(margin, yPos, leftColWidth, 22);
 
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
