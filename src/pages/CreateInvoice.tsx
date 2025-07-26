@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const invoiceSchema = z.object({
   businessName: z.string().min(1, "Business name is required"),
-  gstin: z.string().min(15, "Valid GSTIN is required"),
+  gstin: z.string().min(1, "GSTIN is required"),
   businessAddress: z.string().min(1, "Business address is required"),
   businessState: z.string().min(1, "Business state is required"),
   clientName: z.string().min(1, "Client name is required"),
@@ -87,7 +87,23 @@ const CreateInvoice = () => {
   ) && (isUnlimited || (credits && credits > 0));
 
   const handleGeneratePDF = async () => {
-    if (!canGeneratePDF) return;
+    console.log("Generate PDF clicked", { 
+      isValid, 
+      itemsLength: items.length, 
+      itemsValid: items.some(item => item.description && item.quantity > 0 && item.rate > 0),
+      isUnlimited, 
+      credits,
+      canGeneratePDF 
+    });
+    
+    if (!canGeneratePDF) {
+      toast({
+        title: "Form incomplete",
+        description: "Please fill in all required fields and ensure at least one item is complete",
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (!isUnlimited && (!credits || credits <= 0)) {
       toast({
