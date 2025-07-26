@@ -87,19 +87,44 @@ const CreateInvoice = () => {
   ) && (isUnlimited || (credits !== null && credits > 0));
 
   const handleGeneratePDF = async () => {
-    console.log("Generate PDF clicked", { 
+    console.log("Generate PDF clicked - Full Debug", { 
       isValid, 
       itemsLength: items.length, 
       itemsValid: items.some(item => item.description && item.quantity > 0 && item.rate > 0),
       isUnlimited, 
       credits,
-      canGeneratePDF 
+      canGeneratePDF,
+      formErrors: errors,
+      watchedValues: watchedValues,
+      items: items
+    });
+    
+    // More detailed validation checks
+    const requiredFields = ['businessName', 'gstin', 'businessAddress', 'businessState', 'clientName', 'clientAddress', 'clientState', 'invoiceNumber', 'invoiceDate'];
+    const missingFields = requiredFields.filter(field => !watchedValues[field as keyof typeof watchedValues]);
+    const validItems = items.filter(item => item.description && item.quantity > 0 && item.rate > 0);
+    
+    console.log("Detailed validation:", {
+      missingFields,
+      validItemsCount: validItems.length,
+      totalItemsCount: items.length
     });
     
     if (!canGeneratePDF) {
+      let errorMessage = "Please fix the following issues: ";
+      if (missingFields.length > 0) {
+        errorMessage += `Missing required fields: ${missingFields.join(', ')}. `;
+      }
+      if (validItems.length === 0) {
+        errorMessage += "At least one complete item is required. ";
+      }
+      if (!isUnlimited && (credits === null || credits <= 0)) {
+        errorMessage += "No credits available. ";
+      }
+      
       toast({
         title: "Form incomplete",
-        description: "Please fill in all required fields and ensure at least one item is complete",
+        description: errorMessage,
         variant: "destructive",
       });
       return;
