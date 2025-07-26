@@ -10,6 +10,7 @@ export const generateInvoicePDF = async (
   summary: InvoiceSummary,
   userId?: string
 ): Promise<boolean> => {
+  console.log("Starting PDF generation with data:", { formData, summary, userId });
   const pdf = new jsPDF();
   const pageWidth = pdf.internal.pageSize.width;
   const pageHeight = pdf.internal.pageSize.height;
@@ -296,9 +297,12 @@ export const generateInvoicePDF = async (
   pdf.setTextColor(120, 120, 120);
   pdf.text("Computer generated invoice.", pageWidth / 2, footerY, { align: "center" });
   
+  console.log("About to enter try block for saving/downloading");
   try {
+    console.log("Inside try block, checking if user is logged in:", { userId });
     // Save to database if user is logged in
     if (userId) {
+      console.log("User is logged in, attempting to save to database");
       await supabase.from('invoices').insert({
         user_id: userId,
         invoice_number: formData.invoiceNumber,
@@ -311,6 +315,9 @@ export const generateInvoicePDF = async (
           createdAt: new Date().toISOString()
         }))
       });
+      console.log("Successfully saved to database");
+    } else {
+      console.log("No user logged in, skipping database save");
     }
 
     // Also store in localStorage for backward compatibility
@@ -328,7 +335,9 @@ export const generateInvoicePDF = async (
     
     // Download
     const fileName = `Invoice_${formData.invoiceNumber}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    console.log("About to download PDF with filename:", fileName);
     pdf.save(fileName);
+    console.log("PDF download initiated successfully");
     
     return true;
   } catch (error) {
