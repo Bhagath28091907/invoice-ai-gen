@@ -9,35 +9,11 @@ interface InvoiceSummaryProps {
   summary: InvoiceSummaryType;
   formData: InvoiceFormData;
   isValid: boolean;
+  onGeneratePDF: () => void;
 }
 
-export const InvoiceSummary = ({ summary, formData, isValid }: InvoiceSummaryProps) => {
+export const InvoiceSummary = ({ summary, formData, isValid, onGeneratePDF }: InvoiceSummaryProps) => {
   const { toast } = useToast();
-
-  const handleGeneratePDF = async () => {
-    if (!isValid) {
-      toast({
-        title: "Form Incomplete",
-        description: "Please fill in all required fields before generating PDF.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      await generateInvoicePDF(formData, summary);
-      toast({
-        title: "PDF Generated",
-        description: "Invoice PDF has been downloaded successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to generate PDF. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleEmailToClient = () => {
     if (!isValid) {
@@ -117,7 +93,7 @@ export const InvoiceSummary = ({ summary, formData, isValid }: InvoiceSummaryPro
           variant="hero" 
           size="lg" 
           className="w-full"
-          onClick={handleGeneratePDF}
+          onClick={onGeneratePDF}
         >
           <Download className="w-5 h-5" />
           Generate PDF

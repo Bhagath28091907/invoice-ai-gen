@@ -159,7 +159,8 @@ const CreateInvoice = () => {
             <InvoiceSummary 
               summary={summary} 
               formData={{ ...watchedValues, items }} 
-              isValid={canGeneratePDF} 
+              isValid={canGeneratePDF}
+              onGeneratePDF={handleGeneratePDF}
             />
           </div>
         </form>
