@@ -7,7 +7,7 @@ import Index from "./pages/Index";
 import CreateInvoice from "./pages/CreateInvoice";
 import InvoiceHistory from "./pages/InvoiceHistory";
 import Auth from "./pages/Auth";
-import Upgrade from "./pages/Upgrade";
+
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Header from "./components/Header";
@@ -39,7 +39,7 @@ const AppContent = () => {
           <Route path="/" element={<Index />} />
           <Route path="/create" element={<CreateInvoice />} />
           <Route path="/history" element={<InvoiceHistory />} />
-          <Route path="/upgrade" element={<Upgrade />} />
+          
           <Route path="/about" element={<About />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

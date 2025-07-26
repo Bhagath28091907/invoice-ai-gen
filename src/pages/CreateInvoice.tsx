@@ -81,10 +81,10 @@ const CreateInvoice = () => {
     watchedValues.clientState || ""
   );
 
-  // Check if form is valid for PDF generation
+  // Check if form is valid for PDF generation (removed credit requirement)
   const canGeneratePDF = isValid && items.length > 0 && items.some(item => 
     item.description && item.quantity > 0 && item.rate > 0
-  ) && (isUnlimited || (credits !== null && credits > 0));
+  );
 
   const handleGeneratePDF = async () => {
     console.log("Generate PDF clicked - Full Debug", { 
@@ -118,9 +118,6 @@ const CreateInvoice = () => {
       if (validItems.length === 0) {
         errorMessage += "At least one complete item is required. ";
       }
-      if (!isUnlimited && (credits === null || credits <= 0)) {
-        errorMessage += "No credits available. ";
-      }
       
       toast({
         title: "Form incomplete",
@@ -130,14 +127,6 @@ const CreateInvoice = () => {
       return;
     }
     
-    if (!isUnlimited && (credits === null || credits <= 0)) {
-      toast({
-        title: "No credits remaining",
-        description: "Please upgrade to continue generating invoices",
-        variant: "destructive",
-      });
-      return;
-    }
 
     try {
       const success = await generateInvoicePDF(
@@ -146,15 +135,7 @@ const CreateInvoice = () => {
         user?.id
       );
 
-      if (success && !isUnlimited) {
-        // Deduct credit
-        await supabase
-          .from('user_credits')
-          .update({ credits_remaining: credits! - 1 })
-          .eq('user_id', user!.id);
-        
-        await refreshCredits();
-      }
+      // PDF generated successfully - no credit deduction needed
 
       toast({
         title: "Invoice generated successfully!",
