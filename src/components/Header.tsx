@@ -56,9 +56,7 @@ const Header = () => {
             </nav>
 
             {/* Credits Display */}
-            <div className="hidden md:block">
-              <CreditsDisplay />
-            </div>
+            <CreditsDisplay />
 
             {/* User Menu */}
             <DropdownMenu>
