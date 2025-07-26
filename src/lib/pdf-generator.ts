@@ -59,7 +59,7 @@ export const generateInvoicePDF = async (
   });
 
   // Invoice Details (Right) - Compact
-  const invoiceBoxHeight = formData.dueDate ? 35 : 28;
+  const invoiceBoxHeight = formData.dueDate ? 40 : 32;
   pdf.setFillColor(41, 98, 255);
   pdf.rect(rightColX, yPos, rightColWidth, invoiceBoxHeight, 'F');
   
