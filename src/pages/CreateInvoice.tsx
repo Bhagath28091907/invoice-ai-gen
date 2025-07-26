@@ -40,7 +40,7 @@ const CreateInvoice = () => {
       description: "",
       quantity: 1,
       rate: 0,
-      gstRate: 18,
+      gstRate: 0,
       amount: 0,
       gstAmount: 0,
       totalAmount: 0,
