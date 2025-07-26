@@ -92,24 +92,11 @@ const Auth = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/`,
-        },
-      });
-
-      if (error) throw error;
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-      setLoading(false);
-    }
+    toast({
+      title: "Google Sign In Unavailable",
+      description: "Google authentication is not configured. Please use email/password sign up.",
+      variant: "destructive",
+    });
   };
 
   return (
@@ -211,7 +198,7 @@ const Auth = () => {
               onClick={handleGoogleSignIn}
               variant="outline"
               className="w-full"
-              disabled={loading}
+              disabled={true}
             >
               <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                 <path
@@ -231,7 +218,7 @@ const Auth = () => {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Continue with Google
+              Google Sign In (Not Configured)
             </Button>
           </div>
         </CardContent>
