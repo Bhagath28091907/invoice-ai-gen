@@ -84,7 +84,7 @@ const CreateInvoice = () => {
   // Check if form is valid for PDF generation
   const canGeneratePDF = isValid && items.length > 0 && items.some(item => 
     item.description && item.quantity > 0 && item.rate > 0
-  ) && (isUnlimited || (credits && credits > 0));
+  ) && (isUnlimited || (credits !== null && credits > 0));
 
   const handleGeneratePDF = async () => {
     console.log("Generate PDF clicked", { 
@@ -105,7 +105,7 @@ const CreateInvoice = () => {
       return;
     }
     
-    if (!isUnlimited && (!credits || credits <= 0)) {
+    if (!isUnlimited && (credits === null || credits <= 0)) {
       toast({
         title: "No credits remaining",
         description: "Please upgrade to continue generating invoices",
