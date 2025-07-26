@@ -266,6 +266,26 @@ export const generateInvoicePDF = async (
     yPos += notesHeight + 5;
   }
   
+  // Client Signature Section
+  yPos += 15; // Add space after notes or amount in words
+  
+  pdf.setFontSize(8);
+  pdf.setFont("helvetica", "bold");
+  pdf.setTextColor(0, 0, 0);
+  pdf.text("Client Signature:", margin, yPos);
+  
+  // Signature line
+  const signatureLineY = yPos + 20;
+  pdf.setDrawColor(0, 0, 0);
+  pdf.line(margin, signatureLineY, margin + 80, signatureLineY);
+  
+  pdf.setFontSize(7);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("Signature", margin, signatureLineY + 8);
+  pdf.text("Date: ___________", margin + 120, signatureLineY + 8);
+  
+  yPos = signatureLineY + 15;
+  
   // Minimal footer
   const footerY = pageHeight - 10;
   pdf.setDrawColor(230, 230, 230);
