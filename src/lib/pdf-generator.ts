@@ -59,7 +59,7 @@ export const generateInvoicePDF = async (
   });
 
   // Invoice Details (Right) - Ensure all content fits in blue box
-  const invoiceBoxHeight = formData.dueDate ? 45 : 35;
+  const invoiceBoxHeight = formData.dueDate ? 37 : 27;
   pdf.setFillColor(41, 98, 255);
   pdf.rect(rightColX, yPos, rightColWidth, invoiceBoxHeight, 'F');
   
