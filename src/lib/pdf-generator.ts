@@ -196,7 +196,7 @@ export const generateInvoicePDF = async (
   const summaryX = pageWidth - summaryWidth - margin;
   
   pdf.setFillColor(250, 250, 250);
-  const summaryHeight = summary.isInterstate ? 50 : 62;
+  const summaryHeight = summary.isInterstate ? 80 : 92; // Increased height for signature
   pdf.rect(summaryX, yPos, summaryWidth, summaryHeight, 'F');
   pdf.setDrawColor(220, 220, 220);
   pdf.rect(summaryX, yPos, summaryWidth, summaryHeight);
@@ -230,6 +230,22 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(10);
   pdf.text("TOTAL:", summaryX + 5, summaryYPos + 8);
   pdf.text(`₹${summary.total.toFixed(2)}`, summaryX + summaryWidth - 8, summaryYPos + 8, { align: "right" });
+  
+  // Client Signature inside summary box
+  summaryYPos += 20;
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFontSize(6);
+  pdf.setFont("helvetica", "bold");
+  pdf.text("Client Signature:", summaryX + 5, summaryYPos);
+  
+  // Compact signature line
+  const sigLineY = summaryYPos + 8;
+  pdf.setDrawColor(100, 100, 100);
+  pdf.line(summaryX + 5, sigLineY, summaryX + summaryWidth - 10, sigLineY);
+  
+  pdf.setFontSize(5);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("Sign & Date", summaryX + 5, sigLineY + 6);
   
   pdf.setTextColor(0, 0, 0);
   
@@ -267,25 +283,6 @@ export const generateInvoicePDF = async (
     yPos += notesHeight + 5;
   }
   
-  // Client Signature Section
-  yPos += 15; // Add space after notes or amount in words
-  
-  pdf.setFontSize(8);
-  pdf.setFont("helvetica", "bold");
-  pdf.setTextColor(0, 0, 0);
-  pdf.text("Client Signature:", margin, yPos);
-  
-  // Signature line
-  const signatureLineY = yPos + 20;
-  pdf.setDrawColor(0, 0, 0);
-  pdf.line(margin, signatureLineY, margin + 80, signatureLineY);
-  
-  pdf.setFontSize(7);
-  pdf.setFont("helvetica", "normal");
-  pdf.text("Signature", margin, signatureLineY + 8);
-  pdf.text("Date: ___________", margin + 120, signatureLineY + 8);
-  
-  yPos = signatureLineY + 15;
   
   // Minimal footer
   const footerY = pageHeight - 10;
