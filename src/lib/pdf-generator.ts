@@ -16,17 +16,17 @@ export const generateInvoicePDF = async (
   const margin = 10; // Minimal margin for maximum space
   let yPos = 20;
 
-  // Minimal Header
+  // Minimal Header - Shrunk
   pdf.setFillColor(41, 98, 255);
-  pdf.rect(0, 0, pageWidth, 16, 'F');
+  pdf.rect(0, 0, pageWidth, 12, 'F');
   
-  pdf.setFontSize(12);
+  pdf.setFontSize(10);
   pdf.setFont("helvetica", "bold");
   pdf.setTextColor(255, 255, 255);
-  pdf.text("TAX INVOICE", pageWidth / 2, 11, { align: "center" });
+  pdf.text("TAX INVOICE", pageWidth / 2, 8, { align: "center" });
   
   // Compact layout - using full width efficiently
-  yPos = 20;
+  yPos = 16;
   const leftColWidth = (pageWidth * 0.65) - margin;
   const rightColX = pageWidth * 0.68;
   const rightColWidth = (pageWidth * 0.32) - margin;
@@ -34,9 +34,9 @@ export const generateInvoicePDF = async (
   // Business Information (Left) - Compact
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(250, 250, 250);
-  pdf.rect(margin, yPos, leftColWidth, 45, 'F');
+  pdf.rect(margin, yPos, leftColWidth, 35, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, leftColWidth, 45);
+  pdf.rect(margin, yPos, leftColWidth, 35);
 
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
@@ -51,16 +51,16 @@ export const generateInvoicePDF = async (
   pdf.text(`GSTIN: ${formData.gstin}`, margin + 2, yPos + 21);
   
   const businessAddressLines = formData.businessAddress.split('\n');
-  let businessYPos = yPos + 27;
+  let businessYPos = yPos + 25;
   businessAddressLines.forEach((line) => {
-    if (line.trim() && businessYPos < yPos + 42) {
+    if (line.trim() && businessYPos < yPos + 32) {
       pdf.text(line.trim(), margin + 2, businessYPos);
-      businessYPos += 5;
+      businessYPos += 3;
     }
   });
 
   // Invoice Details (Right) - Compact
-  const invoiceBoxHeight = formData.dueDate ? 40 : 32;
+  const invoiceBoxHeight = formData.dueDate ? 35 : 28;
   pdf.setFillColor(41, 98, 255);
   pdf.rect(rightColX, yPos, rightColWidth, invoiceBoxHeight, 'F');
   
@@ -93,12 +93,12 @@ export const generateInvoicePDF = async (
   }
 
   // Client Information - Compact
-  yPos += 50;
+  yPos += 40;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
-  pdf.rect(margin, yPos, pageWidth - 2 * margin, 35, 'F');
+  pdf.rect(margin, yPos, pageWidth - 2 * margin, 28, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, pageWidth - 2 * margin, 35);
+  pdf.rect(margin, yPos, pageWidth - 2 * margin, 28);
 
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
@@ -115,43 +115,45 @@ export const generateInvoicePDF = async (
   }
   
   const clientAddressLines = formData.clientAddress.split('\n');
-  let clientYPos = yPos + (formData.clientGstin ? 26 : 20);
+  let clientYPos = yPos + (formData.clientGstin ? 23 : 18);
   clientAddressLines.forEach((line) => {
-    if (line.trim() && clientYPos < yPos + 32) {
+    if (line.trim() && clientYPos < yPos + 26) {
       pdf.text(line.trim(), margin + 2, clientYPos);
-      clientYPos += 4;
+      clientYPos += 3;
     }
   });
 
   // Items Table - Compact
-  yPos += 40;
+  yPos += 32;
   const tableWidth = pageWidth - 2 * margin;
   const colWidths = {
-    description: tableWidth * 0.45,
+    serial: tableWidth * 0.08,
+    description: tableWidth * 0.40,
     qty: tableWidth * 0.08,
-    rate: tableWidth * 0.15,
+    rate: tableWidth * 0.14,
     gst: tableWidth * 0.08,
-    amount: tableWidth * 0.24
+    amount: tableWidth * 0.22
   };
 
   // Compact table header
   pdf.setFillColor(41, 98, 255);
-  pdf.rect(margin, yPos, tableWidth, 14, 'F');
+  pdf.rect(margin, yPos, tableWidth, 12, 'F');
   
   pdf.setTextColor(255, 255, 255);
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(8);
-  pdf.text("DESCRIPTION", margin + 2, yPos + 9);
-  pdf.text("QTY", margin + colWidths.description + 2, yPos + 9);
-  pdf.text("RATE (₹)", margin + colWidths.description + colWidths.qty + 2, yPos + 9);
-  pdf.text("GST%", margin + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 9);
-  pdf.text("AMOUNT (₹)", margin + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 2, yPos + 9);
+  pdf.setFontSize(7);
+  pdf.text("S.No", margin + 2, yPos + 8);
+  pdf.text("DESCRIPTION", margin + colWidths.serial + 2, yPos + 8);
+  pdf.text("QTY", margin + colWidths.serial + colWidths.description + 2, yPos + 8);
+  pdf.text("RATE (₹)", margin + colWidths.serial + colWidths.description + colWidths.qty + 2, yPos + 8);
+  pdf.text("GST%", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 8);
+  pdf.text("AMOUNT (₹)", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 2, yPos + 8);
 
   // Table content - Compact rows
-  yPos += 14;
+  yPos += 12;
   pdf.setTextColor(0, 0, 0);
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(8);
+  pdf.setFontSize(7);
   
   formData.items.forEach((item, index) => {
     if (yPos > pageHeight - 80) {
@@ -162,24 +164,25 @@ export const generateInvoicePDF = async (
     // Minimal row background
     if (index % 2 === 0) {
       pdf.setFillColor(252, 252, 252);
-      pdf.rect(margin, yPos, tableWidth, 12, 'F');
+      pdf.rect(margin, yPos, tableWidth, 10, 'F');
     }
     
     // Thin row borders
     pdf.setDrawColor(240, 240, 240);
-    pdf.rect(margin, yPos, tableWidth, 12);
+    pdf.rect(margin, yPos, tableWidth, 10);
     
-    // Compact item details
-    const description = item.description.length > 40 ? 
-      item.description.substring(0, 40) + '...' : item.description;
+    // Compact item details with serial number
+    const description = item.description.length > 35 ? 
+      item.description.substring(0, 35) + '...' : item.description;
     
-    pdf.text(description, margin + 2, yPos + 8);
-    pdf.text(item.quantity.toString(), margin + colWidths.description + 6, yPos + 8, { align: "center" });
-    pdf.text(item.rate.toFixed(2), margin + colWidths.description + colWidths.qty + 12, yPos + 8, { align: "right" });
-    pdf.text(`${item.gstRate}%`, margin + colWidths.description + colWidths.qty + colWidths.rate + 12, yPos + 8, { align: "center" });
-    pdf.text(item.totalAmount.toFixed(2), margin + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 35, yPos + 8, { align: "right" });
+    pdf.text((index + 1).toString(), margin + 4, yPos + 7, { align: "center" });
+    pdf.text(description, margin + colWidths.serial + 2, yPos + 7);
+    pdf.text(item.quantity.toString(), margin + colWidths.serial + colWidths.description + 4, yPos + 7, { align: "center" });
+    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + 10, yPos + 7, { align: "right" });
+    pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 4, yPos + 7, { align: "center" });
+    pdf.text(item.totalAmount.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 28, yPos + 7, { align: "right" });
     
-    yPos += 12;
+    yPos += 10;
   });
 
   // Compact Summary Section
