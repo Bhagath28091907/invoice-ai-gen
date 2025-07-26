@@ -89,6 +89,14 @@ export const BusinessInformationForm = ({ register, setValue, watch }: BusinessI
             </SelectContent>
           </Select>
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="businessPhone">Business Phone *</Label>
+          <Input 
+            id="businessPhone" 
+            placeholder="Enter business phone number" 
+            {...register("businessPhone", { required: true })}
+          />
+        </div>
       </CardContent>
     </Card>
   );

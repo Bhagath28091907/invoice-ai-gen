@@ -85,6 +85,14 @@ export const ClientInformationForm = ({ register, setValue, watch }: ClientInfor
             </SelectContent>
           </Select>
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="clientPhone">Client Phone *</Label>
+          <Input 
+            id="clientPhone" 
+            placeholder="Enter client phone number" 
+            {...register("clientPhone", { required: true })}
+          />
+        </div>
       </CardContent>
     </Card>
   );

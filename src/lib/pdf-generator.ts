@@ -52,11 +52,15 @@ export const generateInvoicePDF = async (
   const businessAddressLines = formData.businessAddress.split('\n');
   let businessYPos = yPos + 18;
   businessAddressLines.forEach((line) => {
-    if (line.trim() && businessYPos < yPos + 28) {
+    if (line.trim() && businessYPos < yPos + 25) {
       pdf.text(line.trim(), margin + 2, businessYPos);
       businessYPos += 3;
     }
   });
+  
+  if (formData.businessPhone && businessYPos < yPos + 28) {
+    pdf.text(`Phone: ${formData.businessPhone}`, margin + 2, businessYPos);
+  }
 
   // Invoice Details (Right) - Ensure all content fits in blue box
   const invoiceBoxHeight = formData.dueDate ? 37 : 27;
@@ -113,11 +117,15 @@ export const generateInvoicePDF = async (
   const clientAddressLines = formData.clientAddress.split('\n');
   let clientYPos = yPos + 18;
   clientAddressLines.forEach((line) => {
-    if (line.trim() && clientYPos < yPos + 20) {
+    if (line.trim() && clientYPos < yPos + 17) {
       pdf.text(line.trim(), margin + 2, clientYPos);
       clientYPos += 3;
     }
   });
+  
+  if (formData.clientPhone && clientYPos < yPos + 20) {
+    pdf.text(`Phone: ${formData.clientPhone}`, margin + 2, clientYPos);
+  }
 
   // Items Table - Compact
   yPos += 26;

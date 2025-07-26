@@ -14,11 +14,13 @@ export interface InvoiceFormData {
   businessName: string;
   businessAddress: string;
   businessState: string;
+  businessPhone: string;
   
   // Client Information
   clientName: string;
   clientAddress: string;
   clientState: string;
+  clientPhone: string;
   
   // Invoice Details
   invoiceNumber: string;
