@@ -34,9 +34,9 @@ export const generateInvoicePDF = async (
   // Business Information (Left) - Compact
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(250, 250, 250);
-  pdf.rect(margin, yPos, leftColWidth, 35, 'F');
+  pdf.rect(margin, yPos, leftColWidth, 32, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, leftColWidth, 35);
+  pdf.rect(margin, yPos, leftColWidth, 32);
 
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
@@ -92,7 +92,7 @@ export const generateInvoicePDF = async (
   }
 
   // Client Information - Below business info, same alignment
-  yPos += 40;
+  yPos += 32;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
   pdf.rect(margin, yPos, leftColWidth, 22, 'F');
