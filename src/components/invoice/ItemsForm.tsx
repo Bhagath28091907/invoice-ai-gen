@@ -63,14 +63,14 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground">
+          <div className="grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground border-b pb-2">
             <div className="col-span-3">Description</div>
-            <div className="col-span-1">Quantity</div>
-            <div className="col-span-2">Rate</div>
-            <div className="col-span-1">GST Rate</div>
-            <div className="col-span-2">Total Amount</div>
-            <div className="col-span-2">Items Left</div>
-            <div className="col-span-1">Action</div>
+            <div className="col-span-1 text-center">Quantity</div>
+            <div className="col-span-2 text-center">Rate</div>
+            <div className="col-span-1 text-center">GST Rate</div>
+            <div className="col-span-2 text-center">Total Amount</div>
+            <div className="col-span-2 text-center">Items Left</div>
+            <div className="col-span-1 text-center">Action</div>
           </div>
           
           {items.length === 0 && (
@@ -80,7 +80,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
           )}
           
           {items.map((item, index) => (
-            <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
+            <div key={item.id} className="grid grid-cols-12 gap-2 items-center py-2 border-b border-gray-100">
               <Input 
                 className="col-span-3" 
                 placeholder="Item description"
@@ -91,6 +91,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 className="col-span-1" 
                 type="number" 
                 placeholder="1"
+                min="0"
                 value={item.quantity}
                 onChange={(e) => updateItem(item.id, "quantity", parseFloat(e.target.value) || 0)}
               />
@@ -99,25 +100,28 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 type="number" 
                 placeholder="0.00"
                 step="0.01"
+                min="0"
                 value={item.rate}
                 onChange={(e) => updateItem(item.id, "rate", parseFloat(e.target.value) || 0)}
               />
-              <Select 
-                value={item.gstRate.toString()} 
-                onValueChange={(value) => updateItem(item.id, "gstRate", parseInt(value))}
-              >
-                <SelectTrigger className="col-span-1">
-                  <SelectValue placeholder="GST%" />
-                </SelectTrigger>
-                <SelectContent>
-                  {GST_RATES.map((rate) => (
-                    <SelectItem key={rate.value} value={rate.value.toString()}>
-                      {rate.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="col-span-2 flex items-center text-sm text-muted-foreground">
+              <div className="col-span-1">
+                <Select 
+                  value={item.gstRate.toString()} 
+                  onValueChange={(value) => updateItem(item.id, "gstRate", parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="GST%" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GST_RATES.map((rate) => (
+                      <SelectItem key={rate.value} value={rate.value.toString()}>
+                        {rate.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-2 flex items-center justify-center text-sm font-medium">
                 ₹{item.totalAmount.toFixed(2)}
               </div>
               <Input 
@@ -126,16 +130,17 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 value={item.itemsLeft || ""}
                 onChange={(e) => updateItem(item.id, "itemsLeft", e.target.value)}
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => removeItem(item.id)}
-                className="col-span-1"
-                disabled={items.length <= 1}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              <div className="col-span-1 flex justify-center">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeItem(item.id)}
+                  disabled={items.length <= 1}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>
