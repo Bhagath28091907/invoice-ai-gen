@@ -43,7 +43,6 @@ export const FloatingCard = ({ position, title, value, color, rotation = [0, 0, 
         color="#ffffff"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/inter-bold.woff"
       >
         {title}
       </Text>
@@ -54,7 +53,6 @@ export const FloatingCard = ({ position, title, value, color, rotation = [0, 0, 
         color="#ffffff"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/inter-bold.woff"
       >
         {value}
       </Text>

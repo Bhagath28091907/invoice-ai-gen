@@ -86,34 +86,6 @@ export const AnimatedDashboard = () => {
             <ambientLight intensity={0.5} />
             <directionalLight position={[10, 10, 5]} intensity={1} />
             <ParallaxBackground />
-            <FloatingCard
-              position={[-3, 2, 0]}
-              title="Total Invoices"
-              value={animatedStats.totalInvoices.toString()}
-              color="#3B82F6"
-              rotation={[0.1, -0.2, 0]}
-            />
-            <FloatingCard
-              position={[3, 2, 0]}
-              title="Revenue"
-              value={`₹${(animatedStats.totalRevenue / 1000).toFixed(1)}K`}
-              color="#10B981"
-              rotation={[-0.1, 0.2, 0]}
-            />
-            <FloatingCard
-              position={[-3, -2, 0]}
-              title="This Month"
-              value={animatedStats.thisMonth.toString()}
-              color="#F59E0B"
-              rotation={[0.1, 0.2, 0]}
-            />
-            <FloatingCard
-              position={[3, -2, 0]}
-              title="Customers"
-              value={animatedStats.customers.toString()}
-              color="#EF4444"
-              rotation={[-0.1, -0.2, 0]}
-            />
             <Environment preset="city" />
           </Suspense>
         </Canvas>
