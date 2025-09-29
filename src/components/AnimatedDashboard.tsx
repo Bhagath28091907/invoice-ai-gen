@@ -1,11 +1,7 @@
-import { Suspense, useEffect, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment, PerspectiveCamera } from '@react-three/drei';
+import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FloatingCard } from './3d/FloatingCard';
-import { ParallaxBackground } from './3d/ParallaxBackground';
 import { TrendingUp, FileText, Users, DollarSign } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -77,18 +73,13 @@ export const AnimatedDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/10">
-      {/* 3D Background Canvas */}
-      <div className="fixed inset-0 z-0">
-        <Canvas>
-          <Suspense fallback={null}>
-            <PerspectiveCamera makeDefault position={[0, 0, 10]} />
-            <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[10, 10, 5]} intensity={1} />
-            <ParallaxBackground />
-            <Environment preset="city" />
-          </Suspense>
-        </Canvas>
+      {/* Animated Background - Simplified */}
+      <div className="fixed inset-0 z-0 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary/20 rounded-full blur-xl animate-pulse"></div>
+          <div className="absolute top-3/4 right-1/4 w-48 h-48 bg-secondary/20 rounded-full blur-xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-1/4 left-1/2 w-24 h-24 bg-accent/20 rounded-full blur-xl animate-pulse delay-2000"></div>
+        </div>
       </div>
 
       {/* Main Content */}
