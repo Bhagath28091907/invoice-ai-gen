@@ -63,13 +63,13 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground border-b pb-2">
+          <div className="grid grid-cols-12 gap-3 text-sm font-medium text-muted-foreground border-b pb-2">
             <div className="col-span-3">Description</div>
-            <div className="col-span-1 text-center">Quantity</div>
+            <div className="col-span-2 text-center">Quantity</div>
             <div className="col-span-2 text-center">Rate</div>
             <div className="col-span-1 text-center">GST Rate</div>
             <div className="col-span-2 text-center">Total Amount</div>
-            <div className="col-span-2 text-center">Items Left</div>
+            <div className="col-span-1 text-center">Items Left</div>
             <div className="col-span-1 text-center">Action</div>
           </div>
           
@@ -88,7 +88,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 onChange={(e) => updateItem(item.id, "description", e.target.value)}
               />
               <Input 
-                className="col-span-1 min-w-0" 
+                className="col-span-2 min-w-[100px]" 
                 type="number" 
                 placeholder="1"
                 min="0"
@@ -125,8 +125,8 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 ₹{item.totalAmount.toFixed(2)}
               </div>
               <Input 
-                className="col-span-2 min-w-0" 
-                placeholder="Items left (optional)"
+                className="col-span-1 min-w-[70px] text-center" 
+                placeholder="Items left"
                 value={item.itemsLeft || ""}
                 onChange={(e) => updateItem(item.id, "itemsLeft", e.target.value)}
               />

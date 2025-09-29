@@ -32,55 +32,62 @@ export const generateInvoicePDF = async (
   const rightColX = pageWidth * 0.68;
   const rightColWidth = (pageWidth * 0.32) - margin;
 
-  // Enterprise Information (Left) - Compact
+  // Enterprise Information (Left) - Compact and neat
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(250, 250, 250);
-  pdf.rect(margin, yPos, leftColWidth, 55, 'F');
+  pdf.rect(margin, yPos, leftColWidth, 48, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, leftColWidth, 55);
+  pdf.rect(margin, yPos, leftColWidth, 48);
 
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
-  pdf.text("BILL FROM:", margin + 2, yPos + 6);
+  pdf.text("BILL FROM:", margin + 2, yPos + 5);
   
-  // Enterprise Details - Layout matching the screenshot
+  // Enterprise Details - Compact layout
   // Business Name
-  pdf.setFontSize(8);
+  pdf.setFontSize(7);
   pdf.setFont("helvetica", "normal");
-  pdf.text("Business Name", margin + 2, yPos + 14);
+  pdf.text("Business Name:", margin + 2, yPos + 11);
   
-  pdf.setFontSize(10);
+  pdf.setFontSize(9);
   pdf.setFont("helvetica", "bold");
-  pdf.text(ENTERPRISE_DETAILS.businessName, margin + 2, yPos + 20);
+  pdf.text(ENTERPRISE_DETAILS.businessName, margin + 2, yPos + 16);
   
   // Address
-  pdf.setFontSize(8);
-  pdf.setFont("helvetica", "normal");
-  pdf.text("Address", margin + 2, yPos + 28);
-  
   pdf.setFontSize(7);
-  pdf.text(ENTERPRISE_DETAILS.businessAddress, margin + 2, yPos + 34);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("Address:", margin + 2, yPos + 22);
+  
+  pdf.setFontSize(6);
+  pdf.text(ENTERPRISE_DETAILS.businessAddress, margin + 2, yPos + 27);
   
   // Phone and State in same row
-  pdf.setFontSize(8);
-  pdf.setFont("helvetica", "normal");
-  pdf.text("Phone", margin + 2, yPos + 42);
-  pdf.text("State", margin + 80, yPos + 42);
-  
-  pdf.setFontSize(7);
-  pdf.text(ENTERPRISE_DETAILS.businessPhone, margin + 2, yPos + 48);
-  pdf.text("Karnataka", margin + 80, yPos + 48);
-  
-  // GST Number and Food License in same row
   pdf.setFontSize(7);
   pdf.setFont("helvetica", "normal");
-  pdf.text("GST Number", margin + 2, yPos + 50);
-  pdf.text("Food License", margin + 80, yPos + 50);
+  pdf.text("Phone:", margin + 2, yPos + 33);
+  pdf.text("State:", margin + 70, yPos + 33);
+  
+  pdf.setFontSize(6);
+  pdf.text(ENTERPRISE_DETAILS.businessPhone, margin + 18, yPos + 33);
+  pdf.text("Karnataka", margin + 85, yPos + 33);
+  
+  // GST Number and Food License in same row - more compact
+  pdf.setFontSize(7);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("GST No:", margin + 2, yPos + 39);
+  pdf.text("Food License:", margin + 70, yPos + 39);
   
   pdf.setFontSize(6);
   pdf.setFont("helvetica", "bold");
-  pdf.text(ENTERPRISE_DETAILS.gstNumber, margin + 2, yPos + 56);
-  pdf.text(ENTERPRISE_DETAILS.foodLicenseNumber, margin + 80, yPos + 56);
+  pdf.text(ENTERPRISE_DETAILS.gstNumber, margin + 18, yPos + 39);
+  pdf.text(ENTERPRISE_DETAILS.foodLicenseNumber, margin + 95, yPos + 39);
+  
+  // Email
+  pdf.setFontSize(7);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("Email:", margin + 2, yPos + 45);
+  pdf.setFontSize(6);
+  pdf.text("kalyanienterprises092025@gmail.com", margin + 18, yPos + 45);
 
   // Invoice info on the right - simplified
   pdf.setFillColor(41, 98, 255);
@@ -99,7 +106,7 @@ export const generateInvoicePDF = async (
   pdf.text(new Date().toLocaleDateString('en-IN'), rightColX + 2, yPos + 20);
 
   // Customer Information - Below enterprise info, same alignment
-  yPos += 62;
+  yPos += 55;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
   pdf.rect(margin, yPos, leftColWidth, 28, 'F');
@@ -240,20 +247,21 @@ export const generateInvoicePDF = async (
   pdf.text(`₹${summary.total.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 20, yPos + 7, { align: "right" });
   yPos += 15;
   
-  // Client Signature - beneath total
+  // Client Signature - right corner beneath total
   pdf.setTextColor(0, 0, 0);
   pdf.setFontSize(9);
   pdf.setFont("helvetica", "bold");
-  pdf.text("Client Signature:", margin + colWidths.serial + colWidths.description, yPos);
+  const signatureX = pageWidth - margin - 80;
+  pdf.text("Client Signature:", signatureX, yPos);
   
   // Signature line
   const sigLineY = yPos + 12;
   pdf.setDrawColor(100, 100, 100);
-  pdf.line(margin + colWidths.serial + colWidths.description, sigLineY, margin + colWidths.serial + colWidths.description + 80, sigLineY);
+  pdf.line(signatureX, sigLineY, signatureX + 75, sigLineY);
   
   pdf.setFontSize(7);
   pdf.setFont("helvetica", "normal");
-  pdf.text("Sign & Date", margin + colWidths.serial + colWidths.description, sigLineY + 8);
+  pdf.text("Sign & Date", signatureX, sigLineY + 8);
   
   pdf.setTextColor(0, 0, 0);
   
