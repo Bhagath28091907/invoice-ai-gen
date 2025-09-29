@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 const Auth = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("kalyanienterprises092025@gmail.com");
+  const [password, setPassword] = useState("kalyani1975");
+  const [fullName, setFullName] = useState("Kalyani Enterprises");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 

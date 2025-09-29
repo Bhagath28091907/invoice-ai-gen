@@ -68,8 +68,8 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
             <div className="col-span-1">Quantity</div>
             <div className="col-span-2">Rate</div>
             <div className="col-span-1">GST Rate</div>
-            <div className="col-span-2">Items Left</div>
             <div className="col-span-2">Total Amount</div>
+            <div className="col-span-2">Items Left</div>
             <div className="col-span-1">Action</div>
           </div>
           
@@ -117,15 +117,15 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   ))}
                 </SelectContent>
               </Select>
+              <div className="col-span-2 flex items-center text-sm text-muted-foreground">
+                ₹{item.totalAmount.toFixed(2)}
+              </div>
               <Input 
                 className="col-span-2" 
                 placeholder="Items left (optional)"
                 value={item.itemsLeft || ""}
                 onChange={(e) => updateItem(item.id, "itemsLeft", e.target.value)}
               />
-              <div className="col-span-2 flex items-center text-sm text-muted-foreground">
-                ₹{item.totalAmount.toFixed(2)}
-              </div>
               <Button
                 type="button"
                 variant="ghost"

@@ -43,16 +43,43 @@ export const generateInvoicePDF = async (
   pdf.setFont("helvetica", "bold");
   pdf.text("BILL FROM:", margin + 2, yPos + 6);
   
+  // Enterprise Details - Layout matching the screenshot
+  // Business Name
+  pdf.setFontSize(8);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("Business Name", margin + 2, yPos + 14);
+  
   pdf.setFontSize(10);
   pdf.setFont("helvetica", "bold");
-  pdf.text(ENTERPRISE_DETAILS.businessName.toUpperCase(), margin + 2, yPos + 14);
+  pdf.text(ENTERPRISE_DETAILS.businessName, margin + 2, yPos + 20);
   
+  // Address
+  pdf.setFontSize(8);
   pdf.setFont("helvetica", "normal");
+  pdf.text("Address", margin + 2, yPos + 28);
+  
   pdf.setFontSize(7);
-  pdf.text(ENTERPRISE_DETAILS.businessAddress, margin + 2, yPos + 18);
-  pdf.text(`Phone: ${ENTERPRISE_DETAILS.businessPhone}`, margin + 2, yPos + 22);
-  pdf.text(`GST: ${ENTERPRISE_DETAILS.gstNumber}`, margin + 2, yPos + 26);
-  pdf.text(`Food License: ${ENTERPRISE_DETAILS.foodLicenseNumber}`, margin + 2, yPos + 30);
+  pdf.text(ENTERPRISE_DETAILS.businessAddress, margin + 2, yPos + 34);
+  
+  // Phone and State in same row
+  pdf.setFontSize(8);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("Phone", margin + 2, yPos + 42);
+  pdf.text("State", margin + 80, yPos + 42);
+  
+  pdf.setFontSize(7);
+  pdf.text(ENTERPRISE_DETAILS.businessPhone, margin + 2, yPos + 48);
+  pdf.text("Karnataka", margin + 80, yPos + 48);
+  
+  // GST Number and Food License in same row
+  pdf.setFontSize(8);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("GST Number", margin + 2, yPos + 56);
+  pdf.text("Food License", margin + 80, yPos + 56);
+  
+  pdf.setFontSize(7);
+  pdf.text(ENTERPRISE_DETAILS.gstNumber, margin + 2, yPos + 62);
+  pdf.text(ENTERPRISE_DETAILS.foodLicenseNumber, margin + 80, yPos + 62);
 
   // Invoice info on the right - simplified
   pdf.setFillColor(41, 98, 255);
@@ -71,7 +98,7 @@ export const generateInvoicePDF = async (
   pdf.text(new Date().toLocaleDateString('en-IN'), rightColX + 2, yPos + 20);
 
   // Customer Information - Below enterprise info, same alignment
-  yPos += 42;
+  yPos += 50;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
   pdf.rect(margin, yPos, leftColWidth, 28, 'F');
@@ -111,8 +138,8 @@ export const generateInvoicePDF = async (
     qty: tableWidth * 0.08,
     rate: tableWidth * 0.12,
     gst: tableWidth * 0.08,
-    itemsLeft: tableWidth * 0.14,
-    amount: tableWidth * 0.20
+    amount: tableWidth * 0.20,
+    itemsLeft: tableWidth * 0.14
   };
 
   // Compact table header
@@ -127,8 +154,8 @@ export const generateInvoicePDF = async (
   pdf.text("QTY", margin + colWidths.serial + colWidths.description + 2, yPos + 8);
   pdf.text("RATE (₹)", margin + colWidths.serial + colWidths.description + colWidths.qty + 2, yPos + 8);
   pdf.text("GST%", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 8);
-  pdf.text("ITEMS LEFT", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 2, yPos + 8);
-  pdf.text("AMOUNT (₹)", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.itemsLeft + 2, yPos + 8);
+  pdf.text("AMOUNT (₹)", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 2, yPos + 8);
+  pdf.text("ITEMS LEFT", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 2, yPos + 8);
 
   // Table content - Compact rows
   yPos += 12;
@@ -161,73 +188,67 @@ export const generateInvoicePDF = async (
     pdf.text(item.quantity.toString(), margin + colWidths.serial + colWidths.description + 4, yPos + 7, { align: "center" });
     pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + 8, yPos + 7, { align: "right" });
     pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 4, yPos + 7, { align: "center" });
-    pdf.text(item.itemsLeft || "-", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 8, yPos + 7, { align: "center" });
-    pdf.text(item.totalAmount.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.itemsLeft + 20, yPos + 7, { align: "right" });
+    pdf.text(item.totalAmount.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 20, yPos + 7, { align: "right" });
+    pdf.text(item.itemsLeft || "-", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 8, yPos + 7, { align: "center" });
     
     yPos += 10;
   });
 
-  // Compact Summary Section
+  // Summary Section - Below table, not in separate box
   yPos += 8;
-  const summaryWidth = 100;
-  const summaryX = pageWidth - summaryWidth - margin;
   
-  pdf.setFillColor(250, 250, 250);
-  const summaryHeight = summary.isInterstate ? 68 : 80; // Further reduced to minimize space below signature
-  pdf.rect(summaryX, yPos, summaryWidth, summaryHeight, 'F');
-  pdf.setDrawColor(220, 220, 220);
-  pdf.rect(summaryX, yPos, summaryWidth, summaryHeight);
-  
-  pdf.setFontSize(8);
+  pdf.setFontSize(9);
   pdf.setFont("helvetica", "normal");
   
-  let summaryYPos = yPos + 10;
-  pdf.text("Subtotal:", summaryX + 5, summaryYPos);
-  pdf.text(`₹${summary.subtotal.toFixed(2)}`, summaryX + summaryWidth - 8, summaryYPos, { align: "right" });
-  summaryYPos += 10;
+  // Summary details without box - right aligned
+  const summaryX = pageWidth - 120;
+  
+  pdf.text("Subtotal:", summaryX, yPos);
+  pdf.text(`₹${summary.subtotal.toFixed(2)}`, summaryX + 80, yPos, { align: "right" });
+  yPos += 8;
   
   if (summary.isInterstate) {
-    pdf.text("IGST:", summaryX + 5, summaryYPos);
-    pdf.text(`₹${summary.igst.toFixed(2)}`, summaryX + summaryWidth - 8, summaryYPos, { align: "right" });
-    summaryYPos += 10;
+    pdf.text("IGST:", summaryX, yPos);
+    pdf.text(`₹${summary.igst.toFixed(2)}`, summaryX + 80, yPos, { align: "right" });
+    yPos += 8;
   } else {
-    pdf.text("CGST:", summaryX + 5, summaryYPos);
-    pdf.text(`₹${summary.cgst.toFixed(2)}`, summaryX + summaryWidth - 8, summaryYPos, { align: "right" });
-    summaryYPos += 10;
-    pdf.text("SGST:", summaryX + 5, summaryYPos);
-    pdf.text(`₹${summary.sgst.toFixed(2)}`, summaryX + summaryWidth - 8, summaryYPos, { align: "right" });
-    summaryYPos += 10;
+    pdf.text("CGST:", summaryX, yPos);
+    pdf.text(`₹${summary.cgst.toFixed(2)}`, summaryX + 80, yPos, { align: "right" });
+    yPos += 8;
+    pdf.text("SGST:", summaryX, yPos);
+    pdf.text(`₹${summary.sgst.toFixed(2)}`, summaryX + 80, yPos, { align: "right" });
+    yPos += 8;
   }
   
-  // Compact total
-  pdf.setFillColor(41, 98, 255);
-  pdf.rect(summaryX, summaryYPos - 2, summaryWidth, 15, 'F');
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(10);
-  pdf.text("TOTAL:", summaryX + 5, summaryYPos + 8);
-  pdf.text(`₹${summary.total.toFixed(2)}`, summaryX + summaryWidth - 8, summaryYPos + 8, { align: "right" });
+  // Total with underline
+  pdf.setDrawColor(0, 0, 0);
+  pdf.line(summaryX, yPos - 2, summaryX + 100, yPos - 2);
   
-  // Client Signature inside summary box
-  summaryYPos += 20;
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(11);
+  pdf.text("TOTAL:", summaryX, yPos + 5);
+  pdf.text(`₹${summary.total.toFixed(2)}`, summaryX + 80, yPos + 5, { align: "right" });
+  yPos += 18;
+  
+  // Client Signature - beneath total
   pdf.setTextColor(0, 0, 0);
-  pdf.setFontSize(6);
+  pdf.setFontSize(9);
   pdf.setFont("helvetica", "bold");
-  pdf.text("Client Signature:", summaryX + 5, summaryYPos);
+  pdf.text("Client Signature:", summaryX, yPos);
   
-  // Compact signature line
-  const sigLineY = summaryYPos + 8;
+  // Signature line
+  const sigLineY = yPos + 12;
   pdf.setDrawColor(100, 100, 100);
-  pdf.line(summaryX + 5, sigLineY, summaryX + summaryWidth - 10, sigLineY);
+  pdf.line(summaryX, sigLineY, summaryX + 80, sigLineY);
   
-  pdf.setFontSize(5);
+  pdf.setFontSize(7);
   pdf.setFont("helvetica", "normal");
-  pdf.text("Sign & Date", summaryX + 5, sigLineY + 6);
+  pdf.text("Sign & Date", summaryX, sigLineY + 8);
   
   pdf.setTextColor(0, 0, 0);
   
-  // Compact amount in words
-  yPos = Math.max(yPos + summaryHeight + 12, summaryYPos + 20);
+  // Amount in words - after signature
+  yPos += 15;
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "italic");
   const amountInWords = numberToWords(Math.floor(summary.total));
