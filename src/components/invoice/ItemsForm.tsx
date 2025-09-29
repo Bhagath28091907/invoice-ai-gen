@@ -80,15 +80,15 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
           )}
           
           {items.map((item, index) => (
-            <div key={item.id} className="grid grid-cols-12 gap-2 items-center py-2 border-b border-gray-100">
+            <div key={item.id} className="grid grid-cols-12 gap-3 items-center py-3 border-b border-gray-100">
               <Input 
-                className="col-span-3" 
+                className="col-span-3 min-w-0" 
                 placeholder="Item description"
                 value={item.description}
                 onChange={(e) => updateItem(item.id, "description", e.target.value)}
               />
               <Input 
-                className="col-span-1" 
+                className="col-span-1 min-w-0" 
                 type="number" 
                 placeholder="1"
                 min="0"
@@ -96,7 +96,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 onChange={(e) => updateItem(item.id, "quantity", parseFloat(e.target.value) || 0)}
               />
               <Input 
-                className="col-span-2" 
+                className="col-span-2 min-w-0" 
                 type="number" 
                 placeholder="0.00"
                 step="0.01"
@@ -104,12 +104,12 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 value={item.rate}
                 onChange={(e) => updateItem(item.id, "rate", parseFloat(e.target.value) || 0)}
               />
-              <div className="col-span-1">
+              <div className="col-span-1 min-w-0">
                 <Select 
                   value={item.gstRate.toString()} 
                   onValueChange={(value) => updateItem(item.id, "gstRate", parseInt(value))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="GST%" />
                   </SelectTrigger>
                   <SelectContent>
@@ -121,16 +121,16 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-2 flex items-center justify-center text-sm font-medium">
+              <div className="col-span-2 flex items-center justify-center text-sm font-medium min-w-0">
                 ₹{item.totalAmount.toFixed(2)}
               </div>
               <Input 
-                className="col-span-2" 
+                className="col-span-2 min-w-0" 
                 placeholder="Items left (optional)"
                 value={item.itemsLeft || ""}
                 onChange={(e) => updateItem(item.id, "itemsLeft", e.target.value)}
               />
-              <div className="col-span-1 flex justify-center">
+              <div className="col-span-1 flex justify-center min-w-0">
                 <Button
                   type="button"
                   variant="ghost"

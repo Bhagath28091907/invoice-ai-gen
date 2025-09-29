@@ -35,9 +35,9 @@ export const generateInvoicePDF = async (
   // Enterprise Information (Left) - Compact
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(250, 250, 250);
-  pdf.rect(margin, yPos, leftColWidth, 48, 'F');
+  pdf.rect(margin, yPos, leftColWidth, 55, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, leftColWidth, 48);
+  pdf.rect(margin, yPos, leftColWidth, 55);
 
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
@@ -74,13 +74,13 @@ export const generateInvoicePDF = async (
   // GST Number and Food License in same row
   pdf.setFontSize(7);
   pdf.setFont("helvetica", "normal");
-  pdf.text("GST Number", margin + 2, yPos + 52);
-  pdf.text("Food License", margin + 80, yPos + 52);
+  pdf.text("GST Number", margin + 2, yPos + 50);
+  pdf.text("Food License", margin + 80, yPos + 50);
   
   pdf.setFontSize(6);
   pdf.setFont("helvetica", "bold");
-  pdf.text(ENTERPRISE_DETAILS.gstNumber, margin + 2, yPos + 57);
-  pdf.text(ENTERPRISE_DETAILS.foodLicenseNumber, margin + 80, yPos + 57);
+  pdf.text(ENTERPRISE_DETAILS.gstNumber, margin + 2, yPos + 56);
+  pdf.text(ENTERPRISE_DETAILS.foodLicenseNumber, margin + 80, yPos + 56);
 
   // Invoice info on the right - simplified
   pdf.setFillColor(41, 98, 255);
@@ -99,7 +99,7 @@ export const generateInvoicePDF = async (
   pdf.text(new Date().toLocaleDateString('en-IN'), rightColX + 2, yPos + 20);
 
   // Customer Information - Below enterprise info, same alignment
-  yPos += 55;
+  yPos += 62;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
   pdf.rect(margin, yPos, leftColWidth, 28, 'F');
@@ -195,19 +195,8 @@ export const generateInvoicePDF = async (
     yPos += 10;
   });
 
-  // Summary as additional row in table format
-  yPos += 5;
-  
-  // Summary row header
-  pdf.setFillColor(248, 248, 248);
-  pdf.rect(margin, yPos, tableWidth, 8, 'F');
-  pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, tableWidth, 8);
-  
-  pdf.setFontSize(8);
-  pdf.setFont("helvetica", "bold");
-  pdf.text("SUMMARY", margin + 2, yPos + 6);
-  yPos += 8;
+  // Summary as table rows continuing from items table
+  yPos += 2;
   
   // Subtotal row
   pdf.setFillColor(252, 252, 252);
@@ -215,27 +204,28 @@ export const generateInvoicePDF = async (
   pdf.setDrawColor(230, 230, 230);
   pdf.rect(margin, yPos, tableWidth, 8);
   
+  pdf.setTextColor(0, 0, 0);
   pdf.setFontSize(7);
   pdf.setFont("helvetica", "normal");
-  pdf.text("Subtotal", margin + colWidths.serial + 2, yPos + 6);
-  pdf.text(`₹${summary.subtotal.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 20, yPos + 6, { align: "right" });
+  pdf.text("Subtotal", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 6);
+  pdf.text(`₹${summary.subtotal.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 20, yPos + 6, { align: "right" });
   yPos += 8;
   
   // GST rows
   if (summary.isInterstate) {
     pdf.rect(margin, yPos, tableWidth, 8);
-    pdf.text("IGST", margin + colWidths.serial + 2, yPos + 6);
-    pdf.text(`₹${summary.igst.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 20, yPos + 6, { align: "right" });
+    pdf.text("IGST", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 6);
+    pdf.text(`₹${summary.igst.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 20, yPos + 6, { align: "right" });
     yPos += 8;
   } else {
     pdf.rect(margin, yPos, tableWidth, 8);
-    pdf.text("CGST", margin + colWidths.serial + 2, yPos + 6);
-    pdf.text(`₹${summary.cgst.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 20, yPos + 6, { align: "right" });
+    pdf.text("CGST", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 6);
+    pdf.text(`₹${summary.cgst.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 20, yPos + 6, { align: "right" });
     yPos += 8;
     
     pdf.rect(margin, yPos, tableWidth, 8);
-    pdf.text("SGST", margin + colWidths.serial + 2, yPos + 6);
-    pdf.text(`₹${summary.sgst.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 20, yPos + 6, { align: "right" });
+    pdf.text("SGST", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 6);
+    pdf.text(`₹${summary.sgst.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 20, yPos + 6, { align: "right" });
     yPos += 8;
   }
   
@@ -246,8 +236,8 @@ export const generateInvoicePDF = async (
   pdf.setTextColor(255, 255, 255);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(8);
-  pdf.text("TOTAL", margin + colWidths.serial + 2, yPos + 7);
-  pdf.text(`₹${summary.total.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 20, yPos + 7, { align: "right" });
+  pdf.text("TOTAL", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 7);
+  pdf.text(`₹${summary.total.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 20, yPos + 7, { align: "right" });
   yPos += 15;
   
   // Client Signature - beneath total
