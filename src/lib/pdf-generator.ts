@@ -1,7 +1,7 @@
 
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { InvoiceFormData, InvoiceSummary } from "@/types/invoice";
+import { InvoiceFormData, InvoiceSummary, ENTERPRISE_DETAILS } from "@/types/invoice";
 import { numberToWords } from "./invoice-calculations";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,12 +32,12 @@ export const generateInvoicePDF = async (
   const rightColX = pageWidth * 0.68;
   const rightColWidth = (pageWidth * 0.32) - margin;
 
-  // Business Information (Left) - Compact
+  // Enterprise Information (Left) - Compact
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(250, 250, 250);
-  pdf.rect(margin, yPos, leftColWidth, 32, 'F');
+  pdf.rect(margin, yPos, leftColWidth, 42, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, leftColWidth, 32);
+  pdf.rect(margin, yPos, leftColWidth, 42);
 
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
@@ -45,64 +45,38 @@ export const generateInvoicePDF = async (
   
   pdf.setFontSize(10);
   pdf.setFont("helvetica", "bold");
-  pdf.text(formData.businessName.toUpperCase(), margin + 2, yPos + 14);
+  pdf.text(ENTERPRISE_DETAILS.businessName.toUpperCase(), margin + 2, yPos + 14);
   
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
-  
-  const businessAddressLines = formData.businessAddress.split('\n');
-  let businessYPos = yPos + 18;
-  businessAddressLines.forEach((line) => {
-    if (line.trim() && businessYPos < yPos + 25) {
-      pdf.text(line.trim(), margin + 2, businessYPos);
-      businessYPos += 3;
-    }
-  });
-  
-  if (formData.businessPhone && businessYPos < yPos + 28) {
-    pdf.text(`Phone: ${formData.businessPhone}`, margin + 2, businessYPos);
-  }
+  pdf.text(ENTERPRISE_DETAILS.businessAddress, margin + 2, yPos + 18);
+  pdf.text(`Phone: ${ENTERPRISE_DETAILS.businessPhone}`, margin + 2, yPos + 22);
+  pdf.text(`GST: ${ENTERPRISE_DETAILS.gstNumber}`, margin + 2, yPos + 26);
+  pdf.text(`Food License: ${ENTERPRISE_DETAILS.foodLicenseNumber}`, margin + 2, yPos + 30);
 
-  // Invoice Details (Right) - Ensure all content fits in blue box
-  const invoiceBoxHeight = formData.dueDate ? 37 : 27;
+  // Invoice info on the right - simplified
   pdf.setFillColor(41, 98, 255);
-  pdf.rect(rightColX, yPos, rightColWidth, invoiceBoxHeight, 'F');
+  pdf.rect(rightColX, yPos, rightColWidth, 25, 'F');
   
   pdf.setTextColor(255, 255, 255);
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(7);
-  pdf.text("INVOICE DETAILS", rightColX + 2, yPos + 6);
+  pdf.setFontSize(8);
+  pdf.text("TAX INVOICE", rightColX + 2, yPos + 8);
   
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(6);
-  pdf.text("Invoice No:", rightColX + 2, yPos + 12);
+  pdf.text("Date:", rightColX + 2, yPos + 16);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(7);
-  pdf.text(formData.invoiceNumber, rightColX + 2, yPos + 16);
-  
-  pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(6);
-  pdf.text("Date:", rightColX + 2, yPos + 22);
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(7);
-  pdf.text(new Date(formData.invoiceDate).toLocaleDateString('en-IN'), rightColX + 2, yPos + 26);
-  
-  if (formData.dueDate) {
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(6);
-    pdf.text("Due Date:", rightColX + 2, yPos + 32);
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(7);
-    pdf.text(new Date(formData.dueDate).toLocaleDateString('en-IN'), rightColX + 2, yPos + 36);
-  }
+  pdf.text(new Date().toLocaleDateString('en-IN'), rightColX + 2, yPos + 20);
 
-  // Client Information - Below business info, same alignment
-  yPos += 32;
+  // Customer Information - Below enterprise info, same alignment
+  yPos += 42;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
-  pdf.rect(margin, yPos, leftColWidth, 22, 'F');
+  pdf.rect(margin, yPos, leftColWidth, 28, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, leftColWidth, 22);
+  pdf.rect(margin, yPos, leftColWidth, 28);
 
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
@@ -118,26 +92,27 @@ export const generateInvoicePDF = async (
   const clientAddressLines = formData.clientAddress.split('\n');
   let clientYPos = yPos + 18;
   clientAddressLines.forEach((line) => {
-    if (line.trim() && clientYPos < yPos + 17) {
+    if (line.trim() && clientYPos < yPos + 22) {
       pdf.text(line.trim(), margin + 2, clientYPos);
       clientYPos += 3;
     }
   });
   
-  if (formData.clientPhone && clientYPos < yPos + 20) {
+  if (formData.clientPhone && clientYPos < yPos + 25) {
     pdf.text(`Phone: ${formData.clientPhone}`, margin + 2, clientYPos);
   }
 
-  // Items Table - Compact
-  yPos += 26;
+  // Items Table - Compact with Items Left column
+  yPos += 32;
   const tableWidth = pageWidth - 2 * margin;
   const colWidths = {
     serial: tableWidth * 0.08,
-    description: tableWidth * 0.40,
+    description: tableWidth * 0.30,
     qty: tableWidth * 0.08,
-    rate: tableWidth * 0.14,
+    rate: tableWidth * 0.12,
     gst: tableWidth * 0.08,
-    amount: tableWidth * 0.22
+    itemsLeft: tableWidth * 0.14,
+    amount: tableWidth * 0.20
   };
 
   // Compact table header
@@ -152,7 +127,8 @@ export const generateInvoicePDF = async (
   pdf.text("QTY", margin + colWidths.serial + colWidths.description + 2, yPos + 8);
   pdf.text("RATE (₹)", margin + colWidths.serial + colWidths.description + colWidths.qty + 2, yPos + 8);
   pdf.text("GST%", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 8);
-  pdf.text("AMOUNT (₹)", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 2, yPos + 8);
+  pdf.text("ITEMS LEFT", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 2, yPos + 8);
+  pdf.text("AMOUNT (₹)", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.itemsLeft + 2, yPos + 8);
 
   // Table content - Compact rows
   yPos += 12;
@@ -176,16 +152,17 @@ export const generateInvoicePDF = async (
     pdf.setDrawColor(240, 240, 240);
     pdf.rect(margin, yPos, tableWidth, 10);
     
-    // Compact item details with serial number
-    const description = item.description.length > 35 ? 
-      item.description.substring(0, 35) + '...' : item.description;
+    // Compact item details with serial number and items left
+    const description = item.description.length > 28 ? 
+      item.description.substring(0, 28) + '...' : item.description;
     
     pdf.text((index + 1).toString(), margin + 4, yPos + 7, { align: "center" });
     pdf.text(description, margin + colWidths.serial + 2, yPos + 7);
     pdf.text(item.quantity.toString(), margin + colWidths.serial + colWidths.description + 4, yPos + 7, { align: "center" });
-    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + 10, yPos + 7, { align: "right" });
+    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + 8, yPos + 7, { align: "right" });
     pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 4, yPos + 7, { align: "center" });
-    pdf.text(item.totalAmount.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 28, yPos + 7, { align: "right" });
+    pdf.text(item.itemsLeft || "-", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 8, yPos + 7, { align: "center" });
+    pdf.text(item.totalAmount.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.itemsLeft + 20, yPos + 7, { align: "right" });
     
     yPos += 10;
   });
@@ -300,10 +277,11 @@ export const generateInvoicePDF = async (
     // Save to database if user is logged in
     if (userId) {
       console.log("User is logged in, attempting to save to database");
+      const invoiceNumber = `INV-${Date.now()}`;
       await supabase.from('invoices').insert({
         user_id: userId,
-        invoice_number: formData.invoiceNumber,
-        business_name: formData.businessName,
+        invoice_number: invoiceNumber,
+        business_name: ENTERPRISE_DETAILS.businessName,
         client_name: formData.clientName,
         total_amount: summary.total,
         invoice_data: JSON.parse(JSON.stringify({
@@ -319,9 +297,9 @@ export const generateInvoicePDF = async (
 
     // Also store in localStorage for backward compatibility
     const invoiceData = {
-      id: formData.invoiceNumber,
+      id: `INV-${Date.now()}`,
       clientName: formData.clientName,
-      date: formData.invoiceDate,
+      date: new Date().toISOString().split('T')[0],
       total: summary.total,
       createdAt: new Date().toISOString()
     };
@@ -331,7 +309,7 @@ export const generateInvoicePDF = async (
     localStorage.setItem('invoiceHistory', JSON.stringify(updatedInvoices));
     
     // Download
-    const fileName = `Invoice_${formData.invoiceNumber}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    const fileName = `Invoice_${Date.now()}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
     console.log("About to download PDF with filename:", fileName);
     pdf.save(fileName);
     console.log("PDF download initiated successfully");
@@ -341,7 +319,7 @@ export const generateInvoicePDF = async (
     console.error('Error saving invoice:', error);
     
     // Still download the PDF even if saving fails
-    const fileName = `Invoice_${formData.invoiceNumber}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    const fileName = `Invoice_${Date.now()}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
     pdf.save(fileName);
     
     return false;

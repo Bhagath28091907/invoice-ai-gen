@@ -4,28 +4,27 @@ export interface InvoiceItem {
   quantity: number;
   rate: number;
   gstRate: number;
+  itemsLeft?: string; // New field for items left
   amount: number;
   gstAmount: number;
   totalAmount: number;
 }
 
+// Fixed enterprise details
+export const ENTERPRISE_DETAILS = {
+  businessName: "Kalyani Enterprises",
+  businessAddress: "Talur Road, Sreedharagadda, Ballari. PIN : 583103",
+  businessState: "karnataka",
+  businessPhone: "9900426623",
+  gstNumber: "29EMLPM3821E1ZW",
+  foodLicenseNumber: "21225025000290"
+};
+
 export interface InvoiceFormData {
-  // Business Information
-  businessName: string;
-  businessAddress: string;
-  businessState: string;
-  businessPhone: string;
-  
-  // Client Information
+  // Client Information (removed state field)
   clientName: string;
   clientAddress: string;
-  clientState: string;
   clientPhone: string;
-  
-  // Invoice Details
-  invoiceNumber: string;
-  invoiceDate: string;
-  dueDate?: string;
   
   // Items
   items: InvoiceItem[];

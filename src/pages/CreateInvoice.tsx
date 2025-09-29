@@ -3,12 +3,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Toaster } from "@/components/ui/toaster";
-import { BusinessInformationForm } from "@/components/invoice/BusinessInformationForm";
 import { ClientInformationForm } from "@/components/invoice/ClientInformationForm";
-import { InvoiceDetailsForm } from "@/components/invoice/InvoiceDetailsForm";
+import { EnterpriseDetailsCard } from "@/components/invoice/EnterpriseDetailsCard";
 import { ItemsForm } from "@/components/invoice/ItemsForm";
 import { InvoiceSummary } from "@/components/invoice/InvoiceSummary";
-import { InvoiceFormData, InvoiceItem } from "@/types/invoice";
+import { InvoiceFormData, InvoiceItem, ENTERPRISE_DETAILS } from "@/types/invoice";
 import { calculateInvoiceSummary } from "@/lib/invoice-calculations";
 import { generateInvoicePDF } from "@/lib/pdf-generator";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,15 +15,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const invoiceSchema = z.object({
-  businessName: z.string().min(1, "Business name is required"),
-  businessAddress: z.string().min(1, "Business address is required"),
-  businessState: z.string().min(1, "Business state is required"),
-  clientName: z.string().min(1, "Client name is required"),
-  clientAddress: z.string().min(1, "Client address is required"),
-  clientState: z.string().min(1, "Client state is required"),
-  invoiceNumber: z.string().min(1, "Invoice number is required"),
-  invoiceDate: z.string().min(1, "Invoice date is required"),
-  dueDate: z.string().optional(),
+  clientName: z.string().min(1, "Customer name is required"),
+  clientAddress: z.string().min(1, "Customer address is required"),
+  clientPhone: z.string().min(1, "Customer phone is required"),
   items: z.array(z.any()).min(1, "At least one item is required"),
   notes: z.string().optional(),
 });
@@ -39,6 +32,7 @@ const CreateInvoice = () => {
       quantity: 1,
       rate: 0,
       gstRate: 0,
+      itemsLeft: "",
       amount: 0,
       gstAmount: 0,
       totalAmount: 0,
@@ -48,15 +42,9 @@ const CreateInvoice = () => {
   const form = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
-      businessName: "",
-      businessAddress: "",
-      businessState: "",
       clientName: "",
       clientAddress: "",
-      clientState: "",
-      invoiceNumber: "",
-      invoiceDate: "",
-      dueDate: "",
+      clientPhone: "",
       items: [],
       notes: "",
     },
@@ -70,11 +58,11 @@ const CreateInvoice = () => {
     setValue("items", items);
   }, [items, setValue]);
 
-  // Calculate summary whenever items or states change
+  // Calculate summary whenever items change (always use Karnataka state for enterprise)
   const summary = calculateInvoiceSummary(
     items,
-    watchedValues.businessState || "",
-    watchedValues.clientState || ""
+    "karnataka", // Enterprise state is always Karnataka
+    "karnataka"  // Simplified - all invoices treated as same state
   );
 
   // Check if form is valid for PDF generation (removed credit requirement)
@@ -96,7 +84,7 @@ const CreateInvoice = () => {
     });
     
     // More detailed validation checks
-    const requiredFields = ['businessName', 'businessAddress', 'businessState', 'clientName', 'clientAddress', 'clientState', 'invoiceNumber', 'invoiceDate'];
+    const requiredFields = ['clientName', 'clientAddress', 'clientPhone'];
     const missingFields = requiredFields.filter(field => !watchedValues[field as keyof typeof watchedValues]);
     const validItems = items.filter(item => item.description && item.quantity > 0 && item.rate > 0);
     
@@ -156,19 +144,11 @@ const CreateInvoice = () => {
 
         <form className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <BusinessInformationForm 
-              register={register} 
-              setValue={setValue} 
-              watch={watch} 
-            />
+            <EnterpriseDetailsCard />
             
             <ClientInformationForm 
               register={register} 
-              setValue={setValue} 
-              watch={watch} 
             />
-            
-            <InvoiceDetailsForm register={register} />
             
             <ItemsForm items={items} onItemsChange={setItems} />
           </div>

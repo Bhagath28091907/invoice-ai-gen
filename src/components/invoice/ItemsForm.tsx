@@ -27,6 +27,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
       quantity: 1,
       rate: 0,
       gstRate: 0,
+      itemsLeft: "",
       amount: 0,
       gstAmount: 0,
       totalAmount: 0,
@@ -64,9 +65,10 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
         <div className="space-y-4">
           <div className="grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground">
             <div className="col-span-3">Description</div>
-            <div className="col-span-2">Quantity</div>
+            <div className="col-span-1">Quantity</div>
             <div className="col-span-2">Rate</div>
-            <div className="col-span-2">GST Rate</div>
+            <div className="col-span-1">GST Rate</div>
+            <div className="col-span-2">Items Left</div>
             <div className="col-span-2">Total Amount</div>
             <div className="col-span-1">Action</div>
           </div>
@@ -86,7 +88,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 onChange={(e) => updateItem(item.id, "description", e.target.value)}
               />
               <Input 
-                className="col-span-2" 
+                className="col-span-1" 
                 type="number" 
                 placeholder="1"
                 value={item.quantity}
@@ -104,7 +106,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 value={item.gstRate.toString()} 
                 onValueChange={(value) => updateItem(item.id, "gstRate", parseInt(value))}
               >
-                <SelectTrigger className="col-span-2">
+                <SelectTrigger className="col-span-1">
                   <SelectValue placeholder="GST%" />
                 </SelectTrigger>
                 <SelectContent>
@@ -115,6 +117,12 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   ))}
                 </SelectContent>
               </Select>
+              <Input 
+                className="col-span-2" 
+                placeholder="Items left (optional)"
+                value={item.itemsLeft || ""}
+                onChange={(e) => updateItem(item.id, "itemsLeft", e.target.value)}
+              />
               <div className="col-span-2 flex items-center text-sm text-muted-foreground">
                 ₹{item.totalAmount.toFixed(2)}
               </div>
