@@ -84,14 +84,14 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(6);
   pdf.text("kalyanienterprises092025@gmail.com", margin + 18, yPos + 45);
 
-  // Date in top right corner of enterprise box
+  // Date in top right corner of BILL FROM box
   pdf.setTextColor(0, 0, 0);
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
-  pdf.text("Date:", pageWidth - margin - 40, yPos + 8);
+  pdf.text("Date:", pageWidth - margin - 35, yPos + 5);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(8);
-  pdf.text(new Date().toLocaleDateString('en-IN'), pageWidth - margin - 40, yPos + 14);
+  pdf.text(new Date().toLocaleDateString('en-IN'), pageWidth - margin - 35, yPos + 11);
 
   // Customer Information - Below enterprise info, full width
   yPos += 55;
