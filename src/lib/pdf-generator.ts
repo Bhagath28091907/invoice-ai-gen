@@ -17,14 +17,16 @@ export const generateInvoicePDF = async (
   const margin = 10; // Minimal margin for maximum space
   let yPos = 20;
 
-  // Minimal Header - Shrunk
-  pdf.setFillColor(41, 98, 255);
-  pdf.rect(0, 0, pageWidth, 12, 'F');
-  
-  pdf.setFontSize(10);
+  // Header with black line
+  pdf.setFontSize(12);
   pdf.setFont("helvetica", "bold");
-  pdf.setTextColor(255, 255, 255);
-  pdf.text("TAX INVOICE", pageWidth / 2, 8, { align: "center" });
+  pdf.setTextColor(0, 0, 0);
+  pdf.text("TAX INVOICE", pageWidth / 2, 15, { align: "center" });
+  
+  // Black line below header
+  pdf.setDrawColor(0, 0, 0);
+  pdf.setLineWidth(0.5);
+  pdf.line(margin, 18, pageWidth - margin, 18);
   
   // Compact layout - using full width efficiently
   yPos = 16;
@@ -89,21 +91,14 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(6);
   pdf.text("kalyanienterprises092025@gmail.com", margin + 18, yPos + 45);
 
-  // Invoice info on the right - simplified
-  pdf.setFillColor(41, 98, 255);
-  pdf.rect(rightColX, yPos, rightColWidth, 25, 'F');
-  
-  pdf.setTextColor(255, 255, 255);
+  // Date on the right - simple text
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(7);
+  pdf.text("Date:", rightColX + 2, yPos + 8);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(8);
-  pdf.text("TAX INVOICE", rightColX + 2, yPos + 8);
-  
-  pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(6);
-  pdf.text("Date:", rightColX + 2, yPos + 16);
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(7);
-  pdf.text(new Date().toLocaleDateString('en-IN'), rightColX + 2, yPos + 20);
+  pdf.text(new Date().toLocaleDateString('en-IN'), rightColX + 2, yPos + 14);
 
   // Customer Information - Below enterprise info, same alignment
   yPos += 55;
@@ -193,7 +188,10 @@ export const generateInvoicePDF = async (
     pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + 8, yPos + 7, { align: "right" });
     pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 4, yPos + 7, { align: "center" });
     pdf.text(item.totalAmount.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 20, yPos + 7, { align: "right" });
-    pdf.text(item.itemsLeft || "-", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 8, yPos + 7, { align: "center" });
+    // Leave items left empty for manual entry
+    if (item.itemsLeft) {
+      pdf.text(item.itemsLeft, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 8, yPos + 7, { align: "center" });
+    }
     
     yPos += 10;
   });
