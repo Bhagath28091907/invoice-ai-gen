@@ -17,29 +17,22 @@ export const generateInvoicePDF = async (
   const margin = 10; // Minimal margin for maximum space
   let yPos = 20;
 
-  // Header with black line
+  // Header
   pdf.setFontSize(12);
   pdf.setFont("helvetica", "bold");
   pdf.setTextColor(0, 0, 0);
   pdf.text("TAX INVOICE", pageWidth / 2, 15, { align: "center" });
   
-  // Black line below header
-  pdf.setDrawColor(0, 0, 0);
-  pdf.setLineWidth(0.5);
-  pdf.line(margin, 18, pageWidth - margin, 18);
-  
-  // Compact layout - using full width efficiently
-  yPos = 16;
-  const leftColWidth = (pageWidth * 0.65) - margin;
-  const rightColX = pageWidth * 0.68;
-  const rightColWidth = (pageWidth * 0.32) - margin;
+  // Full width layout
+  yPos = 22;
+  const fullWidth = pageWidth - 2 * margin;
 
-  // Enterprise Information (Left) - Compact and neat
+  // Enterprise Information - Full width with date in corner
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(250, 250, 250);
-  pdf.rect(margin, yPos, leftColWidth, 48, 'F');
+  pdf.rect(margin, yPos, fullWidth, 48, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, leftColWidth, 48);
+  pdf.rect(margin, yPos, fullWidth, 48);
 
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
@@ -91,22 +84,22 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(6);
   pdf.text("kalyanienterprises092025@gmail.com", margin + 18, yPos + 45);
 
-  // Date on the right - simple text
+  // Date in top right corner of enterprise box
   pdf.setTextColor(0, 0, 0);
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
-  pdf.text("Date:", rightColX + 2, yPos + 8);
+  pdf.text("Date:", pageWidth - margin - 40, yPos + 8);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(8);
-  pdf.text(new Date().toLocaleDateString('en-IN'), rightColX + 2, yPos + 14);
+  pdf.text(new Date().toLocaleDateString('en-IN'), pageWidth - margin - 40, yPos + 14);
 
-  // Customer Information - Below enterprise info, same alignment
+  // Customer Information - Below enterprise info, full width
   yPos += 55;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
-  pdf.rect(margin, yPos, leftColWidth, 28, 'F');
+  pdf.rect(margin, yPos, fullWidth, 28, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, leftColWidth, 28);
+  pdf.rect(margin, yPos, fullWidth, 28);
 
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
