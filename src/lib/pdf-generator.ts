@@ -150,11 +150,12 @@ export const generateInvoicePDF = async (
     itemsLeft: tableWidth * 0.14
   };
 
-  // Compact table header
-  pdf.setFillColor(41, 98, 255);
-  pdf.rect(margin, yPos, tableWidth, 12, 'F');
+  // Table header with black borders (Excel style)
+  pdf.setDrawColor(0, 0, 0);
+  pdf.setLineWidth(0.5);
+  pdf.rect(margin, yPos, tableWidth, 12);
   
-  pdf.setTextColor(255, 255, 255);
+  pdf.setTextColor(0, 0, 0);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(7);
   pdf.text("S.No", margin + 2, yPos + 8);
@@ -177,14 +178,9 @@ export const generateInvoicePDF = async (
       yPos = 30;
     }
     
-    // Minimal row background
-    if (index % 2 === 0) {
-      pdf.setFillColor(252, 252, 252);
-      pdf.rect(margin, yPos, tableWidth, 10, 'F');
-    }
-    
-    // Thin row borders
-    pdf.setDrawColor(240, 240, 240);
+    // Black borders for each row (Excel style)
+    pdf.setDrawColor(0, 0, 0);
+    pdf.setLineWidth(0.3);
     pdf.rect(margin, yPos, tableWidth, 10);
     
     // Compact item details with serial number and items left
@@ -202,45 +198,14 @@ export const generateInvoicePDF = async (
     yPos += 10;
   });
 
-  // Summary as table rows continuing from items table
+  // Total row only (removed subtotal, CGST, SGST)
   yPos += 2;
   
-  // Subtotal row
-  pdf.setFillColor(252, 252, 252);
-  pdf.rect(margin, yPos, tableWidth, 8, 'F');
-  pdf.setDrawColor(230, 230, 230);
-  pdf.rect(margin, yPos, tableWidth, 8);
+  pdf.setDrawColor(0, 0, 0);
+  pdf.setLineWidth(0.5);
+  pdf.rect(margin, yPos, tableWidth, 10);
   
   pdf.setTextColor(0, 0, 0);
-  pdf.setFontSize(7);
-  pdf.setFont("helvetica", "normal");
-  pdf.text("Subtotal", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 6);
-  pdf.text(`₹${summary.subtotal.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 20, yPos + 6, { align: "right" });
-  yPos += 8;
-  
-  // GST rows
-  if (summary.isInterstate) {
-    pdf.rect(margin, yPos, tableWidth, 8);
-    pdf.text("IGST", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 6);
-    pdf.text(`₹${summary.igst.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 20, yPos + 6, { align: "right" });
-    yPos += 8;
-  } else {
-    pdf.rect(margin, yPos, tableWidth, 8);
-    pdf.text("CGST", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 6);
-    pdf.text(`₹${summary.cgst.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 20, yPos + 6, { align: "right" });
-    yPos += 8;
-    
-    pdf.rect(margin, yPos, tableWidth, 8);
-    pdf.text("SGST", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 6);
-    pdf.text(`₹${summary.sgst.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 20, yPos + 6, { align: "right" });
-    yPos += 8;
-  }
-  
-  // Total row
-  pdf.setFillColor(41, 98, 255);
-  pdf.rect(margin, yPos, tableWidth, 10, 'F');
-  
-  pdf.setTextColor(255, 255, 255);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(8);
   pdf.text("TOTAL", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 7);
