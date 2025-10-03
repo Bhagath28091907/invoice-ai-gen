@@ -150,9 +150,9 @@ export const generateInvoicePDF = async (
   pdf.text("S.No", margin + 2, yPos + 7);
   pdf.text("DESCRIPTION", margin + colWidths.serial + 2, yPos + 7);
   pdf.text("QTY", margin + colWidths.serial + colWidths.description + 2, yPos + 7);
-  pdf.text("RATE (₹)", margin + colWidths.serial + colWidths.description + colWidths.qty + 2, yPos + 7);
+  pdf.text("RATE", margin + colWidths.serial + colWidths.description + colWidths.qty + 2, yPos + 7);
   pdf.text("GST%", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 7);
-  pdf.text("AMOUNT (₹)", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 2, yPos + 7);
+  pdf.text("AMOUNT", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 2, yPos + 7);
   pdf.text("ITEMS LEFT", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 2, yPos + 7);
 
   // Table content - Compact rows
@@ -199,7 +199,7 @@ export const generateInvoicePDF = async (
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(9);
   pdf.text("TOTAL", margin + colWidths.serial + 2, yPos + 6);
-  pdf.text(`₹${summary.total.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount - 3, yPos + 6, { align: "right" });
+  pdf.text(summary.total.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount - 3, yPos + 6, { align: "right" });
   yPos += 14;
   
   // Signature section - Client Signature on left, Authorised Signatory on right
