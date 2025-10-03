@@ -173,18 +173,18 @@ export const generateInvoicePDF = async (
     pdf.rect(margin, yPos, tableWidth, 9);
     
     // Compact item details with serial number and items left
-    const description = item.description.length > 22 ? 
-      item.description.substring(0, 22) + '...' : item.description;
+    const description = item.description.length > 18 ? 
+      item.description.substring(0, 18) + '...' : item.description;
     
-    pdf.text((index + 1).toString(), margin + 3, yPos + 6, { align: "center" });
+    pdf.text((index + 1).toString(), margin + colWidths.serial / 2, yPos + 6, { align: "center" });
     pdf.text(description, margin + colWidths.serial + 2, yPos + 6);
-    pdf.text(item.quantity.toString(), margin + colWidths.serial + colWidths.description + 3, yPos + 6, { align: "center" });
-    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + 7, yPos + 6, { align: "right" });
-    pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 3, yPos + 6, { align: "center" });
+    pdf.text(item.quantity.toString(), margin + colWidths.serial + colWidths.description + colWidths.qty / 2, yPos + 6, { align: "center" });
+    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate - 2, yPos + 6, { align: "right" });
+    pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst / 2, yPos + 6, { align: "center" });
     pdf.text(item.totalAmount.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount - 3, yPos + 6, { align: "right" });
-    // Leave items left empty for manual entry
+    // Items left column
     if (item.itemsLeft) {
-      pdf.text(item.itemsLeft, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 7, yPos + 6, { align: "center" });
+      pdf.text(item.itemsLeft, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + colWidths.itemsLeft / 2, yPos + 6, { align: "center" });
     }
     
     yPos += 9;
@@ -198,7 +198,7 @@ export const generateInvoicePDF = async (
   pdf.setTextColor(0, 0, 0);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(9);
-  pdf.text("TOTAL", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 5, yPos + 6);
+  pdf.text("TOTAL", margin + colWidths.serial + 2, yPos + 6);
   pdf.text(`₹${summary.total.toFixed(2)}`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount - 3, yPos + 6, { align: "right" });
   yPos += 14;
   
