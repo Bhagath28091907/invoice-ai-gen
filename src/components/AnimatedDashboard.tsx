@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, FileText, Users, DollarSign } from 'lucide-react';
+import { TrendingUp, FileText, Users, DollarSign, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DashboardStats {
   totalInvoices: number;
@@ -13,6 +15,7 @@ interface DashboardStats {
 }
 
 export const AnimatedDashboard = () => {
+  const { toast } = useToast();
   const [stats, setStats] = useState<DashboardStats>({
     totalInvoices: 0,
     totalRevenue: 0,
@@ -27,8 +30,7 @@ export const AnimatedDashboard = () => {
     customers: 0
   });
 
-  useEffect(() => {
-    // Load stats from localStorage
+  const loadStats = () => {
     const invoiceHistory = JSON.parse(localStorage.getItem('invoiceHistory') || '[]');
     const totalInvoices = invoiceHistory.length;
     const totalRevenue = invoiceHistory.reduce((sum: number, inv: any) => sum + (inv.total || 0), 0);
@@ -41,6 +43,43 @@ export const AnimatedDashboard = () => {
     const customers = new Set(invoiceHistory.map((inv: any) => inv.clientName)).size;
 
     setStats({ totalInvoices, totalRevenue, thisMonth, customers });
+  };
+
+  const handleResetData = async () => {
+    if (!confirm('Are you sure you want to reset all invoice data? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // Clear localStorage
+      localStorage.removeItem('invoiceHistory');
+      
+      // Clear database data if user is logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('invoices').delete().eq('user_id', user.id);
+      }
+
+      // Reset stats
+      setStats({ totalInvoices: 0, totalRevenue: 0, thisMonth: 0, customers: 0 });
+      setAnimatedStats({ totalInvoices: 0, totalRevenue: 0, thisMonth: 0, customers: 0 });
+
+      toast({
+        title: "Data Reset",
+        description: "All invoice data has been cleared successfully.",
+      });
+    } catch (error) {
+      console.error('Error resetting data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reset data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    loadStats();
   }, []);
 
   useEffect(() => {
@@ -146,6 +185,15 @@ export const AnimatedDashboard = () => {
               View Invoice History
             </Button>
           </Link>
+          <Button 
+            onClick={handleResetData}
+            variant="destructive" 
+            size="lg" 
+            className="w-full sm:w-auto transform hover:scale-105 transition-all duration-300"
+          >
+            <RefreshCw className="w-5 h-5 mr-2" />
+            Reset All Data
+          </Button>
         </div>
 
         {/* Enterprise Info Card */}
