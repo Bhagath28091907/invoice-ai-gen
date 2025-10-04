@@ -139,6 +139,10 @@ export const generateInvoicePDF = async (
     itemsLeft: tableWidth * 0.14
   };
 
+  // Precompute Amount column edges for consistent alignment
+  const amountStartX = margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst;
+  const amountRightX = amountStartX + colWidths.amount - 2;
+
   // Table header with black borders (Excel style)
   pdf.setDrawColor(0, 0, 0);
   pdf.setLineWidth(0.4);
@@ -152,7 +156,7 @@ export const generateInvoicePDF = async (
   pdf.text("QTY", margin + colWidths.serial + colWidths.description + 2, yPos + 7);
   pdf.text("RATE", margin + colWidths.serial + colWidths.description + colWidths.qty + 2, yPos + 7);
   pdf.text("GST%", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 7);
-  pdf.text("AMOUNT", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 2, yPos + 7);
+  pdf.text("AMOUNT", amountRightX, yPos + 7, { align: "right" });
   pdf.text("ITEMS LEFT", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 2, yPos + 7);
 
   // Table content - Compact rows
@@ -181,7 +185,7 @@ export const generateInvoicePDF = async (
     pdf.text(item.quantity.toString(), margin + colWidths.serial + colWidths.description + colWidths.qty / 2, yPos + 6, { align: "center" });
     pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + 2, yPos + 6, { align: "left" });
     pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst / 2, yPos + 6, { align: "center" });
-    pdf.text(item.totalAmount.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount - 2, yPos + 6, { align: "right" });
+    pdf.text(item.totalAmount.toFixed(2), amountRightX, yPos + 6, { align: "right" });
     // Items left column
     if (item.itemsLeft) {
       pdf.text(item.itemsLeft, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + colWidths.itemsLeft / 2, yPos + 6, { align: "center" });
@@ -199,7 +203,7 @@ export const generateInvoicePDF = async (
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(9);
   pdf.text("TOTAL", margin + colWidths.serial + 2, yPos + 6);
-  pdf.text(summary.total.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount - 2, yPos + 6, { align: "right" });
+  pdf.text(summary.total.toFixed(2), amountRightX, yPos + 6, { align: "right" });
   yPos += 12;
   
   // Signature section - Client Signature on left, Authorised Signatory on right
