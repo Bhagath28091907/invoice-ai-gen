@@ -270,17 +270,6 @@ export const generateInvoicePDF = async (
     yPos += notesHeight + 4;
   }
   
-  
-  // Minimal footer
-  const footerY = pageHeight - 8;
-  pdf.setDrawColor(230, 230, 230);
-  pdf.line(margin, footerY - 2, pageWidth - margin, footerY - 2);
-  
-  pdf.setFontSize(8);
-  pdf.setFont("helvetica", "normal");
-  pdf.setTextColor(120, 120, 120);
-  pdf.text("Computer generated invoice.", pageWidth / 2, footerY, { align: "center" });
-  
   console.log("About to enter try block for saving/downloading");
   try {
     console.log("Inside try block, checking if user is logged in:", { userId });
