@@ -162,7 +162,7 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(8);
   
   formData.items.forEach((item, index) => {
-    if (yPos > pageHeight - 80) {
+    if (yPos > pageHeight - 50) {
       pdf.addPage();
       yPos = 25;
     }
