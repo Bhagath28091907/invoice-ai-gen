@@ -95,7 +95,7 @@ export const generateInvoicePDF = async (
   pdf.text(new Date().toLocaleDateString('en-IN'), pageWidth - margin - 30, yPos + 11);
 
   // Customer Information - Below enterprise info, full width
-  yPos += 48;
+  yPos += 44;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
   pdf.rect(margin, yPos, fullWidth, 26, 'F');
@@ -127,7 +127,7 @@ export const generateInvoicePDF = async (
   }
 
   // Items Table - Compact with Items Left column
-  yPos += 30;
+  yPos += 28;
   const tableWidth = pageWidth - 2 * margin;
   const colWidths = {
     serial: tableWidth * 0.08,
@@ -162,7 +162,7 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(8);
   
   formData.items.forEach((item, index) => {
-    if (yPos > pageHeight - 50) {
+    if (yPos > pageHeight - 30) {
       pdf.addPage();
       yPos = 25;
     }
@@ -200,7 +200,7 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(9);
   pdf.text("TOTAL", margin + colWidths.serial + 2, yPos + 6);
   pdf.text(summary.total.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount - 2, yPos + 6, { align: "right" });
-  yPos += 14;
+  yPos += 12;
   
   // Signature section - Client Signature on left, Authorised Signatory on right
   pdf.setTextColor(0, 0, 0);
