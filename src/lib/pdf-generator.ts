@@ -73,10 +73,12 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "normal");
   pdf.text("GST No:", margin + 2, yPos + 35);
+  pdf.text("Food Lic:", margin + 50, yPos + 35);
   
   pdf.setFontSize(7);
   pdf.setFont("helvetica", "bold");
   pdf.text(ENTERPRISE_DETAILS.gstNumber, margin + 17, yPos + 35);
+  pdf.text(ENTERPRISE_DETAILS.foodLicenseNumber, margin + 66, yPos + 35);
   
   // Email
   pdf.setFontSize(8);

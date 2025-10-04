@@ -17,7 +17,7 @@ export const ENTERPRISE_DETAILS = {
   businessState: "karnataka",
   businessPhone: "9900426623",
   gstNumber: "29EMLPM3821E1ZW",
-  foodLicenseNumber: "21225025000290"
+  foodLicenseNumber: "20250930107794088"
 };
 
 export interface InvoiceFormData {
