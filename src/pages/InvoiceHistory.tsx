@@ -67,6 +67,14 @@ const InvoiceHistory = () => {
     XLSX.writeFile(wb, fileName);
   };
 
+  const clearHistory = () => {
+    if (confirm('Are you sure you want to clear all invoice history? This action cannot be undone.')) {
+      localStorage.removeItem('invoiceHistory');
+      setInvoices([]);
+      setFilteredInvoices([]);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Paid": return "success";
@@ -140,10 +148,16 @@ const InvoiceHistory = () => {
                   <div className="text-lg font-semibold">
                     Total Income: ₹{totalIncome.toLocaleString()}
                   </div>
-                  <Button onClick={exportToExcel} variant="hero">
-                    <FileSpreadsheet className="w-4 h-4 mr-2" />
-                    Export to Excel
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={exportToExcel} variant="hero">
+                      <FileSpreadsheet className="w-4 h-4 mr-2" />
+                      Export to Excel
+                    </Button>
+                    <Button onClick={clearHistory} variant="destructive">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Clear History
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
