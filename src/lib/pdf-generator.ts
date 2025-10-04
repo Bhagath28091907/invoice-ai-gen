@@ -179,9 +179,9 @@ export const generateInvoicePDF = async (
     pdf.text((index + 1).toString(), margin + colWidths.serial / 2, yPos + 6, { align: "center" });
     pdf.text(description, margin + colWidths.serial + 2, yPos + 6);
     pdf.text(item.quantity.toString(), margin + colWidths.serial + colWidths.description + colWidths.qty / 2, yPos + 6, { align: "center" });
-    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + 2, yPos + 6);
+    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + 2, yPos + 6, { align: "left" });
     pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst / 2, yPos + 6, { align: "center" });
-    pdf.text(item.totalAmount.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 2, yPos + 6);
+    pdf.text(item.totalAmount.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 2, yPos + 6, { align: "left" });
     // Items left column
     if (item.itemsLeft) {
       pdf.text(item.itemsLeft, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + colWidths.itemsLeft / 2, yPos + 6, { align: "center" });
@@ -199,7 +199,7 @@ export const generateInvoicePDF = async (
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(9);
   pdf.text("TOTAL", margin + colWidths.serial + 2, yPos + 6);
-  pdf.text(summary.total.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + 2, yPos + 6);
+  pdf.text(summary.total.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 2, yPos + 6, { align: "left" });
   yPos += 14;
   
   // Signature section - Client Signature on left, Authorised Signatory on right
