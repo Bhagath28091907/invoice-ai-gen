@@ -126,6 +126,11 @@ export const generateInvoicePDF = async (
   
   if (formData.clientPhone && clientYPos < yPos + 23) {
     pdf.text(`Phone: ${formData.clientPhone}`, margin + 2, clientYPos);
+    clientYPos += 3;
+  }
+  
+  if (formData.clientGstNumber && clientYPos < yPos + 26) {
+    pdf.text(`GST No: ${formData.clientGstNumber}`, margin + 2, clientYPos);
   }
 
   // Items Table - Compact with Items Left column

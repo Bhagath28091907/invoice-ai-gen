@@ -41,6 +41,14 @@ export const ClientInformationForm = ({ register }: ClientInformationFormProps) 
             {...register("clientPhone", { required: true })}
           />
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="clientGstNumber">Customer GST Number (Optional)</Label>
+          <Input 
+            id="clientGstNumber" 
+            placeholder="Enter customer GST number" 
+            {...register("clientGstNumber")}
+          />
+        </div>
       </CardContent>
     </Card>
   );

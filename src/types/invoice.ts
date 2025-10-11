@@ -25,6 +25,7 @@ export interface InvoiceFormData {
   clientName: string;
   clientAddress: string;
   clientPhone: string;
+  clientGstNumber?: string;
   
   // Items
   items: InvoiceItem[];
