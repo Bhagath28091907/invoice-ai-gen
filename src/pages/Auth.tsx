@@ -12,26 +12,12 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Authorized credentials
-  const AUTHORIZED_EMAIL = "kalyanienterprises092025@gmail.com";
-  const AUTHORIZED_PASSWORD = "kalyani1975";
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check if credentials match authorized credentials
-    if (email !== AUTHORIZED_EMAIL || password !== AUTHORIZED_PASSWORD) {
-      toast({
-        title: "Access Denied",
-        description: "Invalid credentials. Access is restricted.",
         variant: "destructive",
       });
       return;
