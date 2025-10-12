@@ -18,23 +18,57 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
-    const authHeader = req.headers.get('Authorization')!;
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('Missing authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
     const token = authHeader.replace('Bearer ', '');
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
 
     if (!user?.email) {
-      throw new Error('User not authenticated');
+      console.error('User authentication failed');
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
     }
 
-    const { amount, currency } = await req.json();
+    const requestBody = await req.json();
+    const { amount, currency } = requestBody;
+
+    // Input validation
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
+      console.error('Invalid amount provided:', amount);
+      return new Response(
+        JSON.stringify({ error: 'Invalid payment amount' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
+
+    if (!currency || typeof currency !== 'string' || currency.length !== 3) {
+      console.error('Invalid currency provided:', currency);
+      return new Response(
+        JSON.stringify({ error: 'Invalid currency code' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
 
     // Create Razorpay order
     const razorpayKeyId = Deno.env.get('RAZORPAY_KEY_ID');
     const razorpayKeySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
 
     if (!razorpayKeyId || !razorpayKeySecret) {
-      throw new Error('Razorpay credentials not configured');
+      console.error('Payment service configuration error');
+      return new Response(
+        JSON.stringify({ error: 'Payment service unavailable' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 503 }
+      );
     }
 
     const auth = btoa(`${razorpayKeyId}:${razorpayKeySecret}`);
@@ -53,7 +87,12 @@ serve(async (req) => {
     });
 
     if (!orderResponse.ok) {
-      throw new Error('Failed to create Razorpay order');
+      const errorData = await orderResponse.json().catch(() => ({}));
+      console.error('Razorpay API error:', { status: orderResponse.status, error: errorData });
+      return new Response(
+        JSON.stringify({ error: 'Failed to create payment order' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
     }
 
     const order = await orderResponse.json();
@@ -65,10 +104,10 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error('Error creating Razorpay order:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    });
+    console.error('Payment order creation error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to create payment order. Please try again.' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+    );
   }
 });

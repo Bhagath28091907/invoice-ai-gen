@@ -19,28 +19,58 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
-    const authHeader = req.headers.get('Authorization')!;
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('Missing authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
     const token = authHeader.replace('Bearer ', '');
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
 
     if (!user?.email) {
-      throw new Error('User not authenticated');
+      console.error('User authentication failed');
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
     }
 
-    const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = await req.json();
+    const requestBody = await req.json();
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = requestBody;
+
+    // Input validation
+    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+      console.error('Missing payment parameters');
+      return new Response(
+        JSON.stringify({ error: 'Invalid payment data' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
 
     // Verify payment signature
     const razorpayKeySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
     if (!razorpayKeySecret) {
-      throw new Error('Razorpay secret not configured');
+      console.error('Payment service configuration error');
+      return new Response(
+        JSON.stringify({ error: 'Payment verification unavailable' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 503 }
+      );
     }
 
     const body = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSignature = await createHmac("sha256", razorpayKeySecret).update(body).digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-      throw new Error('Invalid payment signature');
+      console.error('Payment signature verification failed', { razorpay_order_id });
+      return new Response(
+        JSON.stringify({ error: 'Payment verification failed' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
     // Use service role client to update database
@@ -50,6 +80,9 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // Validate payment amount (expected: 100 INR = 10000 paise)
+    const expectedAmount = 10000;
+    
     // Create subscription record
     const expiresAt = new Date();
     expiresAt.setFullYear(expiresAt.getFullYear() + 1); // Add 1 year
@@ -60,7 +93,7 @@ serve(async (req) => {
         user_id: user.id,
         razorpay_payment_id,
         razorpay_order_id,
-        amount: 10000, // 100 INR in paise
+        amount: expectedAmount,
         currency: 'INR',
         status: 'completed',
         subscription_type: 'annual',
@@ -68,7 +101,11 @@ serve(async (req) => {
       });
 
     if (subscriptionError) {
-      throw subscriptionError;
+      console.error('Subscription creation failed', { user_id: user.id, error: subscriptionError });
+      return new Response(
+        JSON.stringify({ error: 'Payment processing failed' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
     }
 
     // Update user credits to unlimited
@@ -83,7 +120,11 @@ serve(async (req) => {
       .eq('user_id', user.id);
 
     if (creditsError) {
-      throw creditsError;
+      console.error('Credits update failed', { user_id: user.id, error: creditsError });
+      return new Response(
+        JSON.stringify({ error: 'Payment processing failed' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
     }
 
     console.log('Payment verified and subscription updated for user:', user.id);
@@ -93,10 +134,10 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error('Error verifying payment:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    });
+    console.error('Payment verification error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Payment verification failed. Please contact support if the issue persists.' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+    );
   }
 });
