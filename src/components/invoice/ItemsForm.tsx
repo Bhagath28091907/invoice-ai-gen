@@ -2,9 +2,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Plus, Trash2, Check, ChevronsUpDown } from "lucide-react";
 import { InvoiceItem } from "@/types/invoice";
 import { calculateItemAmounts } from "@/lib/invoice-calculations";
+import { PREDEFINED_ITEMS } from "@/constants/items";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface ItemsFormProps {
   items: InvoiceItem[];
@@ -20,6 +25,12 @@ const GST_RATES = [
 ];
 
 export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
+  const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({});
+
+  const togglePopover = (itemId: string, open: boolean) => {
+    setOpenPopovers(prev => ({ ...prev, [itemId]: open }));
+  };
+
   const addItem = () => {
     const newItem: InvoiceItem = {
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -81,12 +92,49 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
           
           {items.map((item, index) => (
             <div key={item.id} className="grid grid-cols-12 gap-3 items-center py-3 border-b border-gray-100">
-              <Input 
-                className="col-span-3 min-w-0" 
-                placeholder="Item description"
-                value={item.description}
-                onChange={(e) => updateItem(item.id, "description", e.target.value)}
-              />
+              <div className="col-span-3 min-w-0">
+                <Popover open={openPopovers[item.id]} onOpenChange={(open) => togglePopover(item.id, open)}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openPopovers[item.id]}
+                      className="w-full justify-between"
+                    >
+                      {item.description || "Select item..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Search items..." />
+                      <CommandList>
+                        <CommandEmpty>No item found.</CommandEmpty>
+                        <CommandGroup>
+                          {PREDEFINED_ITEMS.map((itemName) => (
+                            <CommandItem
+                              key={itemName}
+                              value={itemName}
+                              onSelect={(currentValue) => {
+                                updateItem(item.id, "description", currentValue);
+                                togglePopover(item.id, false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  item.description === itemName ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {itemName}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
               <Input 
                 className="col-span-2 min-w-[100px]" 
                 type="number" 
