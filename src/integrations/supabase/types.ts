@@ -74,56 +74,11 @@ export type Database = {
         }
         Relationships: []
       }
-      subscriptions: {
-        Row: {
-          amount: number
-          created_at: string
-          currency: string
-          expires_at: string
-          id: string
-          razorpay_order_id: string | null
-          razorpay_payment_id: string | null
-          status: string
-          subscription_type: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          currency?: string
-          expires_at: string
-          id?: string
-          razorpay_order_id?: string | null
-          razorpay_payment_id?: string | null
-          status?: string
-          subscription_type?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          currency?: string
-          expires_at?: string
-          id?: string
-          razorpay_order_id?: string | null
-          razorpay_payment_id?: string | null
-          status?: string
-          subscription_type?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_credits: {
         Row: {
           created_at: string
           credits_remaining: number
           id: string
-          is_unlimited: boolean
-          total_credits_purchased: number
-          unlimited_expires_at: string | null
           updated_at: string
           user_id: string
         }
@@ -131,9 +86,6 @@ export type Database = {
           created_at?: string
           credits_remaining?: number
           id?: string
-          is_unlimited?: boolean
-          total_credits_purchased?: number
-          unlimited_expires_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -141,9 +93,6 @@ export type Database = {
           created_at?: string
           credits_remaining?: number
           id?: string
-          is_unlimited?: boolean
-          total_credits_purchased?: number
-          unlimited_expires_at?: string | null
           updated_at?: string
           user_id?: string
         }

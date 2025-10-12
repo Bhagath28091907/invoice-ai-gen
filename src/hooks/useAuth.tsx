@@ -27,19 +27,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from("user_credits")
-        .select("credits_remaining, is_unlimited, unlimited_expires_at")
+        .select("credits_remaining")
         .eq("user_id", user.id)
         .single();
 
       if (error) throw error;
 
       if (data) {
-        const now = new Date();
-        const expiresAt = data.unlimited_expires_at ? new Date(data.unlimited_expires_at) : null;
-        const unlimited = data.is_unlimited && (!expiresAt || expiresAt > now);
-        
         setCredits(data.credits_remaining);
-        setIsUnlimited(unlimited);
+        setIsUnlimited(false); // No unlimited feature without payments
       }
     } catch (error) {
       console.error("Error fetching credits:", error);
