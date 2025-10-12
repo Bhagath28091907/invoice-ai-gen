@@ -85,7 +85,7 @@ export const generateInvoicePDF = async (
   pdf.setFont("helvetica", "normal");
   pdf.text("Email:", margin + 2, yPos + 40);
   pdf.setFontSize(7);
-  pdf.text("kalyanienterprises092025@gmail.com", margin + 15, yPos + 40);
+  pdf.text(ENTERPRISE_DETAILS.businessEmail, margin + 15, yPos + 40);
 
   // Date in top right corner of BILL FROM box
   pdf.setTextColor(0, 0, 0);

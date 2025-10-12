@@ -16,6 +16,7 @@ export const ENTERPRISE_DETAILS = {
   businessAddress: "Talur Road, Sreedharagadda, Ballari. PIN : 583103",
   businessState: "karnataka",
   businessPhone: "9900426623",
+  businessEmail: "kalyanienterprises092025@gmail.com",
   gstNumber: "29EMLPM3821E1ZW",
   foodLicenseNumber: "20250930107794088"
 };
