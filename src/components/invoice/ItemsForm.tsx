@@ -105,10 +105,10 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[300px] p-0" align="start">
-                    <Command>
-                      <CommandInput placeholder="Search items..." />
-                      <CommandList>
+                  <PopoverContent className="w-[300px] p-0 bg-background z-50 shadow-lg border" align="start">
+                    <Command className="bg-background">
+                      <CommandInput placeholder="Search items..." className="h-9" />
+                      <CommandList className="max-h-[300px]">
                         <CommandEmpty>No item found.</CommandEmpty>
                         <CommandGroup>
                           {PREDEFINED_ITEMS.map((itemName) => (
