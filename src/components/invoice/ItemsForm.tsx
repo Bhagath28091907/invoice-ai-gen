@@ -4,12 +4,15 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Trash2, Check, ChevronsUpDown } from "lucide-react";
 import { InvoiceItem } from "@/types/invoice";
 import { calculateItemAmounts } from "@/lib/invoice-calculations";
 import { PREDEFINED_ITEMS } from "@/constants/items";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useCustomItems } from "@/hooks/useCustomItems";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ItemsFormProps {
   items: InvoiceItem[];
@@ -25,10 +28,26 @@ const GST_RATES = [
 ];
 
 export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
+  const { user } = useAuth();
+  const { customItems, addCustomItem, isLoading } = useCustomItems(user?.id);
   const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({});
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newItemName, setNewItemName] = useState("");
+
+  const allItems = [...PREDEFINED_ITEMS, ...customItems].sort();
 
   const togglePopover = (itemId: string, open: boolean) => {
     setOpenPopovers(prev => ({ ...prev, [itemId]: open }));
+  };
+
+  const handleAddNewItem = async () => {
+    if (!newItemName.trim()) return;
+    
+    const success = await addCustomItem(newItemName.trim());
+    if (success) {
+      setNewItemName("");
+      setIsDialogOpen(false);
+    }
   };
 
   const addItem = () => {
@@ -109,9 +128,46 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                     <Command className="bg-background">
                       <CommandInput placeholder="Search items..." className="h-9" />
                       <CommandList className="max-h-[300px]">
-                        <CommandEmpty>No item found.</CommandEmpty>
+                        <CommandEmpty>
+                          <div className="text-center py-4">
+                            <p className="text-sm text-muted-foreground mb-2">No item found.</p>
+                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <Plus className="w-3 h-3 mr-1" />
+                                  Add New Item
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Add New Item</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                  <Input
+                                    placeholder="Enter item name"
+                                    value={newItemName}
+                                    onChange={(e) => setNewItemName(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        handleAddNewItem();
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <DialogFooter>
+                                  <Button
+                                    onClick={handleAddNewItem}
+                                    disabled={!newItemName.trim() || isLoading}
+                                  >
+                                    {isLoading ? "Adding..." : "Add Item"}
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        </CommandEmpty>
                         <CommandGroup>
-                          {PREDEFINED_ITEMS.map((itemName) => (
+                          {allItems.map((itemName) => (
                             <CommandItem
                               key={itemName}
                               value={itemName}
