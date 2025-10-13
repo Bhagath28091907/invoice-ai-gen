@@ -94,7 +94,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="grid grid-cols-12 gap-3 text-xs font-medium text-muted-foreground border-b pb-2">
+          <div className="grid grid-cols-12 gap-4 text-xs font-medium text-muted-foreground border-b pb-2">
             <div className="col-span-3">Description</div>
             <div className="col-span-2 text-center">HSN</div>
             <div className="col-span-1 text-center">Qty</div>
@@ -111,7 +111,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
           )}
           
           {items.map((item, index) => (
-            <div key={item.id} className="grid grid-cols-12 gap-3 items-center py-3 border-b border-gray-100">
+            <div key={item.id} className="grid grid-cols-12 gap-4 items-center py-3 border-b border-gray-100">
               <div className="col-span-3 min-w-0">
                 <Popover open={openPopovers[item.id]} onOpenChange={(open) => togglePopover(item.id, open)}>
                   <PopoverTrigger asChild>
