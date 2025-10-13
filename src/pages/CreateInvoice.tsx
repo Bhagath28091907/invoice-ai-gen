@@ -54,6 +54,29 @@ const CreateInvoice = () => {
   const { register, handleSubmit, setValue, watch, formState: { errors, isValid } } = form;
   const watchedValues = watch();
 
+  // Load invoice data for editing if available
+  useEffect(() => {
+    const editData = sessionStorage.getItem('editInvoiceData');
+    if (editData) {
+      try {
+        const { formData } = JSON.parse(editData);
+        setValue('clientName', formData.clientName);
+        setValue('clientAddress', formData.clientAddress);
+        setValue('clientPhone', formData.clientPhone);
+        setValue('clientGstNumber', formData.clientGstNumber || '');
+        setValue('notes', formData.notes || '');
+        setItems(formData.items);
+        sessionStorage.removeItem('editInvoiceData');
+        toast({
+          title: "Invoice loaded for editing",
+          description: "Make your changes and generate a new invoice",
+        });
+      } catch (error) {
+        console.error('Error loading invoice data:', error);
+      }
+    }
+  }, [setValue, toast]);
+
   // Update items in form when items state changes
   useEffect(() => {
     setValue("items", items);

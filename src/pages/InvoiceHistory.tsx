@@ -2,23 +2,74 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { History, Search, Download, Eye, Edit, Trash2, FileSpreadsheet } from "lucide-react";
+import { History, Search, Download, Eye, Edit, Trash2, FileSpreadsheet, Printer } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import * as XLSX from 'xlsx';
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { generateInvoicePDF } from "@/lib/pdf-generator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const InvoiceHistory = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [invoices, setInvoices] = useState<any[]>([]);
   const [filteredInvoices, setFilteredInvoices] = useState<any[]>([]);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<string | null>(null);
   
   useEffect(() => {
-    // Load invoices from localStorage
-    const storedInvoices = JSON.parse(localStorage.getItem('invoiceHistory') || '[]');
-    setInvoices(storedInvoices);
-    setFilteredInvoices(storedInvoices);
-  }, []);
+    if (user) {
+      fetchInvoices();
+    }
+  }, [user]);
+
+  const fetchInvoices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedInvoices = data?.map(invoice => ({
+        id: invoice.invoice_number,
+        dbId: invoice.id,
+        clientName: invoice.client_name,
+        businessName: invoice.business_name,
+        date: invoice.created_at,
+        total: invoice.total_amount,
+        invoiceData: invoice.invoice_data
+      })) || [];
+
+      setInvoices(formattedInvoices);
+      setFilteredInvoices(formattedInvoices);
+    } catch (error) {
+      console.error('Error fetching invoices:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load invoices",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     let filtered = [...invoices];
@@ -67,12 +118,91 @@ const InvoiceHistory = () => {
     XLSX.writeFile(wb, fileName);
   };
 
-  const clearHistory = () => {
-    if (confirm('Are you sure you want to clear all invoice history? This action cannot be undone.')) {
-      localStorage.removeItem('invoiceHistory');
+  const clearHistory = async () => {
+    if (!window.confirm('Are you sure you want to clear all invoice history? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .delete()
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
       setInvoices([]);
       setFilteredInvoices([]);
+      toast({
+        title: "Success",
+        description: "Invoice history cleared",
+      });
+    } catch (error) {
+      console.error('Error clearing history:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clear history",
+        variant: "destructive",
+      });
     }
+  };
+
+  const handleDeleteInvoice = async () => {
+    if (!invoiceToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .delete()
+        .eq('id', invoiceToDelete);
+
+      if (error) throw error;
+
+      await fetchInvoices();
+      toast({
+        title: "Success",
+        description: "Invoice deleted",
+      });
+    } catch (error) {
+      console.error('Error deleting invoice:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete invoice",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setInvoiceToDelete(null);
+    }
+  };
+
+  const confirmDelete = (dbId: string) => {
+    setInvoiceToDelete(dbId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleReprint = async (invoice: any) => {
+    try {
+      const { formData, summary } = invoice.invoiceData;
+      await generateInvoicePDF(formData, summary, user?.id);
+      toast({
+        title: "Success",
+        description: "Invoice reprinted",
+      });
+    } catch (error) {
+      console.error('Error reprinting invoice:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reprint invoice",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = (invoice: any) => {
+    // Store invoice data in sessionStorage to load in CreateInvoice
+    sessionStorage.setItem('editInvoiceData', JSON.stringify(invoice.invoiceData));
+    navigate('/create');
   };
 
   const getStatusColor = (status: string) => {
@@ -202,11 +332,29 @@ const InvoiceHistory = () => {
                         <td className="py-4 px-2 font-medium">₹{invoice.total.toLocaleString()}</td>
                         <td className="py-4 px-2">
                           <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="sm" title="View Invoice">
-                              <Eye className="w-4 h-4" />
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              title="Reprint Invoice"
+                              onClick={() => handleReprint(invoice)}
+                            >
+                              <Printer className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" title="Download PDF">
-                              <Download className="w-4 h-4" />
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              title="Edit & Reprint"
+                              onClick={() => handleEdit(invoice)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              title="Delete Invoice"
+                              onClick={() => confirmDelete(invoice.dbId)}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
                             </Button>
                           </div>
                         </td>
@@ -218,6 +366,24 @@ const InvoiceHistory = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Invoice</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this invoice? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteInvoice} className="bg-destructive hover:bg-destructive/90">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
