@@ -256,9 +256,9 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   variant="ghost"
                   size="sm"
                   onClick={() => removeItem(item.id)}
-                  disabled={items.length <= 1}
+                  className="hover:bg-destructive/10"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4 text-destructive" />
                 </Button>
               </div>
             </div>
