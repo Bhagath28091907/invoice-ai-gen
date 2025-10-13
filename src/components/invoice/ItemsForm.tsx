@@ -94,7 +94,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="grid grid-cols-12 gap-6 text-xs font-medium text-muted-foreground border-b pb-2">
+          <div className="grid grid-cols-12 gap-3 md:gap-6 text-xs font-medium text-muted-foreground border-b pb-2">
             <div className="col-span-3">Description</div>
             <div className="col-span-2 text-center">HSN</div>
             <div className="col-span-1 text-center">Qty</div>
@@ -111,7 +111,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
           )}
           
           {items.map((item, index) => (
-            <div key={item.id} className="grid grid-cols-12 gap-6 items-center py-3 border-b border-gray-100">
+            <div key={item.id} className="grid grid-cols-12 gap-3 md:gap-6 items-center py-3 border-b border-gray-100">
               <div className="col-span-3 min-w-0">
                 <Popover open={openPopovers[item.id]} onOpenChange={(open) => togglePopover(item.id, open)}>
                   <PopoverTrigger asChild>
@@ -199,7 +199,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="col-span-2 min-w-[128px] overflow-hidden">
+              <div className="col-span-2 min-w-[112px] overflow-hidden relative z-0">
                 <Select
                   value={item.hsnCode || ""} 
                   onValueChange={(value) => updateItem(item.id, "hsnCode", value)}
@@ -214,7 +214,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 </Select>
               </div>
               <Input 
-                className="col-span-1 text-sm h-9 relative z-10"
+                className="col-span-1 text-sm h-9 relative z-20"
                 type="number" 
                 placeholder="1"
                 min="0"
