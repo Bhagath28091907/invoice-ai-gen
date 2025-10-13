@@ -105,21 +105,21 @@ export const generateInvoicePDF = async (
   pdf.text(ENTERPRISE_DETAILS.gstNumber, margin + 17, yPos + 35);
   pdf.text(ENTERPRISE_DETAILS.foodLicenseNumber, margin + 66, yPos + 35);
   
-  // Vehicle Number - aligned to the right side
+  // Vehicle Number - top right corner
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "normal");
   const vehicleX = pageWidth - margin - 45;
-  pdf.text("Vehicle No:", vehicleX, yPos + 30);
+  pdf.text("Vehicle No:", vehicleX, yPos + 10);
   pdf.setFontSize(7);
   pdf.setFont("helvetica", "bold");
-  pdf.text(ENTERPRISE_DETAILS.vehicleNumber, vehicleX + 20, yPos + 30);
+  pdf.text(ENTERPRISE_DETAILS.vehicleNumber, vehicleX + 20, yPos + 10);
   
   // Driver Name below Vehicle
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "normal");
-  pdf.text("Driver Name:", vehicleX, yPos + 35);
+  pdf.text("Driver Name:", vehicleX, yPos + 15);
   pdf.setFontSize(7);
-  pdf.text("Maruthi N", vehicleX + 22, yPos + 35);
+  pdf.text("Maruthi N", vehicleX + 22, yPos + 15);
   
   // Email
   pdf.setFontSize(8);
@@ -279,9 +279,9 @@ export const generateInvoicePDF = async (
   const totalLabelY = yPos + 6;
   pdf.text("TOTAL", totalLabelX, totalLabelY);
 
-  // Middle: CGST/SGST (or IGST) anchored to fixed column positions to avoid overlap
-  const cgstX = margin + tableWidth * 0.45;
-  const sgstX = margin + tableWidth * 0.65;
+  // Middle: CGST/SGST (or IGST) with better spacing
+  const cgstX = margin + tableWidth * 0.40;
+  const sgstX = margin + tableWidth * 0.62;
   if (summary.isInterstate) {
     pdf.text(`IGST: ₹${summary.igst.toFixed(2)}`, cgstX, totalLabelY);
   } else {
