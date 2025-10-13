@@ -75,5 +75,90 @@ export const useCustomItems = (userId: string | undefined) => {
     }
   };
 
-  return { customItems, addCustomItem, isLoading, refetch: fetchCustomItems };
+  const updateCustomItem = async (oldName: string, newName: string) => {
+    if (!userId) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to update items",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from("custom_items")
+        .update({ item_name: newName })
+        .eq("user_id", userId)
+        .eq("item_name", oldName);
+
+      if (error) throw error;
+
+      setCustomItems(prev => prev.map(item => item === oldName ? newName : item).sort());
+      toast({
+        title: "Item updated",
+        description: `Item renamed to "${newName}"`,
+      });
+      return true;
+    } catch (error) {
+      console.error("Error updating custom item:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update item",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteCustomItem = async (itemName: string) => {
+    if (!userId) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to delete items",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from("custom_items")
+        .delete()
+        .eq("user_id", userId)
+        .eq("item_name", itemName);
+
+      if (error) throw error;
+
+      setCustomItems(prev => prev.filter(item => item !== itemName));
+      toast({
+        title: "Item deleted",
+        description: `"${itemName}" has been removed`,
+      });
+      return true;
+    } catch (error) {
+      console.error("Error deleting custom item:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete item",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { 
+    customItems, 
+    addCustomItem, 
+    updateCustomItem,
+    deleteCustomItem,
+    isLoading, 
+    refetch: fetchCustomItems 
+  };
 };
