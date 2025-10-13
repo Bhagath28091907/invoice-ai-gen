@@ -128,42 +128,49 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                     <Command className="bg-background">
                       <CommandInput placeholder="Search items..." className="h-9" />
                       <CommandList className="max-h-[300px]">
+                        <CommandGroup>
+                          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                            <DialogTrigger asChild>
+                              <CommandItem
+                                onSelect={() => {
+                                  setIsDialogOpen(true);
+                                }}
+                                className="bg-primary/10 hover:bg-primary/20 font-medium cursor-pointer"
+                              >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Add New Item
+                              </CommandItem>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Add New Item</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4 py-4">
+                                <Input
+                                  placeholder="Enter item name"
+                                  value={newItemName}
+                                  onChange={(e) => setNewItemName(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      handleAddNewItem();
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <DialogFooter>
+                                <Button
+                                  onClick={handleAddNewItem}
+                                  disabled={!newItemName.trim() || isLoading}
+                                >
+                                  {isLoading ? "Adding..." : "Add Item"}
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </CommandGroup>
                         <CommandEmpty>
                           <div className="text-center py-4">
-                            <p className="text-sm text-muted-foreground mb-2">No item found.</p>
-                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                              <DialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <Plus className="w-3 h-3 mr-1" />
-                                  Add New Item
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Add New Item</DialogTitle>
-                                </DialogHeader>
-                                <div className="space-y-4 py-4">
-                                  <Input
-                                    placeholder="Enter item name"
-                                    value={newItemName}
-                                    onChange={(e) => setNewItemName(e.target.value)}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter") {
-                                        handleAddNewItem();
-                                      }
-                                    }}
-                                  />
-                                </div>
-                                <DialogFooter>
-                                  <Button
-                                    onClick={handleAddNewItem}
-                                    disabled={!newItemName.trim() || isLoading}
-                                  >
-                                    {isLoading ? "Adding..." : "Add Item"}
-                                  </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
+                            <p className="text-sm text-muted-foreground">No item found.</p>
                           </div>
                         </CommandEmpty>
                         <CommandGroup>
