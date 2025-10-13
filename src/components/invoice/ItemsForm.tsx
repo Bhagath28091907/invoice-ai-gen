@@ -57,6 +57,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
       quantity: 1,
       rate: 0,
       gstRate: 0,
+      hsnCode: "",
       itemsLeft: "",
       amount: 0,
       gstAmount: 0,
@@ -93,13 +94,14 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="grid grid-cols-12 gap-3 text-sm font-medium text-muted-foreground border-b pb-2">
+          <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
             <div className="col-span-3">Description</div>
-            <div className="col-span-2 text-center">Quantity</div>
+            <div className="col-span-1 text-center">Qty</div>
             <div className="col-span-2 text-center">Rate</div>
-            <div className="col-span-1 text-center">GST Rate</div>
-            <div className="col-span-2 text-center">Total Amount</div>
-            <div className="col-span-1 text-center">Items Left</div>
+            <div className="col-span-1 text-center">GST%</div>
+            <div className="col-span-1 text-center">HSN</div>
+            <div className="col-span-2 text-center">Total</div>
+            <div className="col-span-1 text-center">Left</div>
             <div className="col-span-1 text-center">Action</div>
           </div>
           
@@ -110,7 +112,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
           )}
           
           {items.map((item, index) => (
-            <div key={item.id} className="grid grid-cols-12 gap-3 items-center py-3 border-b border-gray-100">
+            <div key={item.id} className="grid grid-cols-12 gap-2 items-center py-3 border-b border-gray-100">
               <div className="col-span-3 min-w-0">
                 <Popover open={openPopovers[item.id]} onOpenChange={(open) => togglePopover(item.id, open)}>
                   <PopoverTrigger asChild>
@@ -118,7 +120,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                       variant="outline"
                       role="combobox"
                       aria-expanded={openPopovers[item.id]}
-                      className="w-full justify-between"
+                      className="w-full justify-between text-xs h-9"
                     >
                       {item.description || "Select item..."}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -199,7 +201,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 </Popover>
               </div>
               <Input 
-                className="col-span-2 min-w-[100px]" 
+                className="col-span-1 min-w-[60px] text-sm h-9" 
                 type="number" 
                 placeholder="1"
                 min="0"
@@ -207,7 +209,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 onChange={(e) => updateItem(item.id, "quantity", parseFloat(e.target.value) || 0)}
               />
               <Input 
-                className="col-span-2 min-w-0" 
+                className="col-span-2 min-w-0 text-sm h-9" 
                 type="number" 
                 placeholder="0.00"
                 step="0.01"
@@ -220,7 +222,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   value={item.gstRate.toString()} 
                   onValueChange={(value) => updateItem(item.id, "gstRate", parseInt(value))}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full text-xs h-9">
                     <SelectValue placeholder="GST%" />
                   </SelectTrigger>
                   <SelectContent>
@@ -232,12 +234,26 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="col-span-1 min-w-0">
+                <Select 
+                  value={item.hsnCode || ""} 
+                  onValueChange={(value) => updateItem(item.id, "hsnCode", value)}
+                >
+                  <SelectTrigger className="w-full text-xs h-9">
+                    <SelectValue placeholder="HSN" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="20052000">20052000</SelectItem>
+                    <SelectItem value="21069099">21069099</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="col-span-2 flex items-center justify-center text-sm font-medium min-w-0">
                 ₹{item.totalAmount.toFixed(2)}
               </div>
               <Input 
-                className="col-span-1 min-w-[70px] text-center" 
-                placeholder="Items left"
+                className="col-span-1 min-w-[60px] text-xs text-center h-9" 
+                placeholder="Left"
                 value={item.itemsLeft || ""}
                 onChange={(e) => updateItem(item.id, "itemsLeft", e.target.value)}
               />

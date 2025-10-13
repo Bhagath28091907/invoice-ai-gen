@@ -20,7 +20,7 @@ export const EnterpriseDetailsCard = () => {
           <div className="text-sm font-semibold text-muted-foreground">Address</div>
           <div className="text-sm">{ENTERPRISE_DETAILS.businessAddress}</div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
             <div className="text-sm font-semibold text-muted-foreground">Phone</div>
             <div className="text-sm">{ENTERPRISE_DETAILS.businessPhone}</div>
@@ -28,6 +28,10 @@ export const EnterpriseDetailsCard = () => {
           <div>
             <div className="text-sm font-semibold text-muted-foreground">State</div>
             <div className="text-sm">Karnataka</div>
+          </div>
+          <div>
+            <div className="text-sm font-semibold text-muted-foreground">Vehicle No</div>
+            <div className="text-sm font-mono">{ENTERPRISE_DETAILS.vehicleNumber}</div>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -38,6 +42,23 @@ export const EnterpriseDetailsCard = () => {
           <div>
             <div className="text-sm font-semibold text-muted-foreground">Food License</div>
             <div className="text-sm font-mono">{ENTERPRISE_DETAILS.foodLicenseNumber}</div>
+          </div>
+        </div>
+        <div className="border-t pt-3">
+          <div className="text-sm font-semibold text-muted-foreground mb-2">Bank Details</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <div className="text-xs text-muted-foreground">Bank Name</div>
+              <div className="text-sm font-medium">{ENTERPRISE_DETAILS.bankName}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Account Number</div>
+              <div className="text-sm font-mono">{ENTERPRISE_DETAILS.accountNumber}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">IFSC Code</div>
+              <div className="text-sm font-mono">{ENTERPRISE_DETAILS.ifscCode}</div>
+            </div>
           </div>
         </div>
       </CardContent>

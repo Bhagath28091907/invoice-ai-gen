@@ -4,6 +4,7 @@ export interface InvoiceItem {
   quantity: number;
   rate: number;
   gstRate: number;
+  hsnCode?: string; // HSN code field
   itemsLeft?: string; // New field for items left
   amount: number;
   gstAmount: number;
@@ -18,7 +19,11 @@ export const ENTERPRISE_DETAILS = {
   businessPhone: "9900426623",
   businessEmail: "kalyanienterprises092025@gmail.com",
   gstNumber: "29EMLPM3821E1ZW",
-  foodLicenseNumber: "20250930107794088"
+  foodLicenseNumber: "20250930107794088",
+  vehicleNumber: "KA34D3693",
+  bankName: "SBI",
+  accountNumber: "44483491251",
+  ifscCode: "SBIN0000817"
 };
 
 export interface InvoiceFormData {

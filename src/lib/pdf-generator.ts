@@ -11,37 +11,64 @@ export const generateInvoicePDF = async (
   userId?: string
 ): Promise<boolean> => {
   console.log("Starting PDF generation with data:", { formData, summary, userId });
+  
+  // Get sequential invoice number
+  let invoiceNumber = 1;
+  try {
+    if (userId) {
+      const { count } = await supabase
+        .from('invoices')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+      invoiceNumber = (count || 0) + 1;
+    } else {
+      // Fallback to localStorage count
+      const existingInvoices = JSON.parse(localStorage.getItem('invoiceHistory') || '[]');
+      invoiceNumber = existingInvoices.length + 1;
+    }
+  } catch (error) {
+    console.error('Error getting invoice count:', error);
+  }
+  
   const pdf = new jsPDF({
     format: 'a5',
     unit: 'mm'
   });
   const pageWidth = pdf.internal.pageSize.width;
   const pageHeight = pdf.internal.pageSize.height;
-  const margin = 8; // Minimal margin for A5 size
-  let yPos = 15;
+  const margin = 8;
+  let yPos = 8;
 
-  // Header
-  pdf.setFontSize(14);
+  // Invoice Number - Top Left
+  pdf.setFontSize(10);
   pdf.setFont("helvetica", "bold");
   pdf.setTextColor(0, 0, 0);
-  pdf.text("TAX INVOICE", pageWidth / 2, 12, { align: "center" });
+  pdf.text(`Invoice No: ${invoiceNumber}`, margin, yPos);
+  
+  // Date - Top Right
+  pdf.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, pageWidth - margin, yPos, { align: "right" });
+  
+  // Header
+  yPos = 15;
+  pdf.setFontSize(14);
+  pdf.text("TAX INVOICE", pageWidth / 2, yPos, { align: "center" });
   
   // Full width layout
-  yPos = 18;
+  yPos = 20;
   const fullWidth = pageWidth - 2 * margin;
 
-  // Enterprise Information - Full width with date in corner
+
+  // Enterprise Information - Full width
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(250, 250, 250);
-  pdf.rect(margin, yPos, fullWidth, 42, 'F');
+  pdf.rect(margin, yPos, fullWidth, 50, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, fullWidth, 42);
+  pdf.rect(margin, yPos, fullWidth, 50);
 
   pdf.setFontSize(9);
   pdf.setFont("helvetica", "bold");
   pdf.text("BILL FROM:", margin + 2, yPos + 5);
   
-  // Enterprise Details - Compact layout
   // Business Name
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "normal");
@@ -59,19 +86,19 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(7);
   pdf.text(ENTERPRISE_DETAILS.businessAddress, margin + 2, yPos + 25);
   
-  // Phone and State in same row
+  // Phone, State, Vehicle in one row
   pdf.setFontSize(8);
-  pdf.setFont("helvetica", "normal");
   pdf.text("Phone:", margin + 2, yPos + 30);
-  pdf.text("State:", margin + 50, yPos + 30);
+  pdf.text("State:", margin + 40, yPos + 30);
+  pdf.text("Vehicle:", margin + 70, yPos + 30);
   
   pdf.setFontSize(7);
-  pdf.text(ENTERPRISE_DETAILS.businessPhone, margin + 15, yPos + 30);
-  pdf.text("Karnataka", margin + 62, yPos + 30);
+  pdf.text(ENTERPRISE_DETAILS.businessPhone, margin + 13, yPos + 30);
+  pdf.text("Karnataka", margin + 50, yPos + 30);
+  pdf.text(ENTERPRISE_DETAILS.vehicleNumber, margin + 82, yPos + 30);
   
   // GST Number and Food License in same row
   pdf.setFontSize(8);
-  pdf.setFont("helvetica", "normal");
   pdf.text("GST No:", margin + 2, yPos + 35);
   pdf.text("Food Lic:", margin + 50, yPos + 35);
   
@@ -86,18 +113,18 @@ export const generateInvoicePDF = async (
   pdf.text("Email:", margin + 2, yPos + 40);
   pdf.setFontSize(7);
   pdf.text(ENTERPRISE_DETAILS.businessEmail, margin + 15, yPos + 40);
-
-  // Date in top right corner of BILL FROM box
-  pdf.setTextColor(0, 0, 0);
-  pdf.setFont("helvetica", "normal");
+  
+  // Bank Details Section
   pdf.setFontSize(8);
-  pdf.text("Date:", pageWidth - margin - 30, yPos + 5);
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(9);
-  pdf.text(new Date().toLocaleDateString('en-IN'), pageWidth - margin - 30, yPos + 11);
+  pdf.text("Bank Details:", margin + 2, yPos + 45);
+  
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(7);
+  pdf.text(`${ENTERPRISE_DETAILS.bankName} | A/c: ${ENTERPRISE_DETAILS.accountNumber} | IFSC: ${ENTERPRISE_DETAILS.ifscCode}`, margin + 2, yPos + 49);
 
-  // Customer Information - Below enterprise info, full width
-  yPos += 44;
+  // Customer Information
+  yPos += 52;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
   pdf.rect(margin, yPos, fullWidth, 26, 'F');
@@ -133,44 +160,45 @@ export const generateInvoicePDF = async (
     pdf.text(`GST No: ${formData.clientGstNumber}`, margin + 2, clientYPos);
   }
 
-  // Items Table - Compact with Items Left column
+  // Items Table with HSN column
   yPos += 28;
   const tableWidth = pageWidth - 2 * margin;
   const colWidths = {
-    serial: tableWidth * 0.08,
-    description: tableWidth * 0.30,
-    qty: tableWidth * 0.08,
-    rate: tableWidth * 0.12,
-    gst: tableWidth * 0.08,
-    amount: tableWidth * 0.20,
-    itemsLeft: tableWidth * 0.14
+    serial: tableWidth * 0.07,
+    description: tableWidth * 0.26,
+    hsn: tableWidth * 0.12,
+    qty: tableWidth * 0.07,
+    rate: tableWidth * 0.11,
+    gst: tableWidth * 0.07,
+    amount: tableWidth * 0.18,
+    itemsLeft: tableWidth * 0.12
   };
 
-  // Precompute Amount column edges for consistent alignment
-  const amountStartX = margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst;
+  // Precompute Amount column edges
+  const amountStartX = margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + colWidths.gst;
   const amountRightX = amountStartX + colWidths.amount - 2;
 
-  // Table header with black borders (Excel style)
+  // Table header
   pdf.setDrawColor(0, 0, 0);
   pdf.setLineWidth(0.4);
   pdf.rect(margin, yPos, tableWidth, 10);
   
   pdf.setTextColor(0, 0, 0);
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(8);
+  pdf.setFontSize(7);
   pdf.text("S.No", margin + 2, yPos + 7);
   pdf.text("DESCRIPTION", margin + colWidths.serial + 2, yPos + 7);
-  pdf.text("QTY", margin + colWidths.serial + colWidths.description + 2, yPos + 7);
-  pdf.text("RATE", margin + colWidths.serial + colWidths.description + colWidths.qty + 2, yPos + 7);
-  pdf.text("GST%", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + 2, yPos + 7);
+  pdf.text("HSN", margin + colWidths.serial + colWidths.description + 2, yPos + 7);
+  pdf.text("QTY", margin + colWidths.serial + colWidths.description + colWidths.hsn + 2, yPos + 7);
+  pdf.text("RATE", margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + 2, yPos + 7);
+  pdf.text("GST%", margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + 2, yPos + 7);
   pdf.text("AMOUNT", amountRightX, yPos + 7, { align: "right" });
-  pdf.text("ITEMS LEFT", margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 2, yPos + 7);
+  pdf.text("LEFT", margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 2, yPos + 7);
 
-  // Table content - Compact rows
+  // Table content
   yPos += 10;
-  pdf.setTextColor(0, 0, 0);
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(8);
+  pdf.setFontSize(7);
   
   formData.items.forEach((item, index) => {
     if (yPos > pageHeight - 30) {
@@ -178,38 +206,41 @@ export const generateInvoicePDF = async (
       yPos = 25;
     }
     
-    // Black borders for each row (Excel style)
     pdf.setDrawColor(0, 0, 0);
     pdf.setLineWidth(0.3);
     pdf.rect(margin, yPos, tableWidth, 9);
     
-    // Compact item details with serial number and items left
-    const description = item.description.length > 18 ? 
-      item.description.substring(0, 18) + '...' : item.description;
+    const description = item.description.length > 16 ? 
+      item.description.substring(0, 16) + '...' : item.description;
     
     pdf.text((index + 1).toString(), margin + colWidths.serial / 2, yPos + 6, { align: "center" });
     pdf.text(description, margin + colWidths.serial + 2, yPos + 6);
-    pdf.text(item.quantity.toString(), margin + colWidths.serial + colWidths.description + colWidths.qty / 2, yPos + 6, { align: "center" });
-    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.qty + 2, yPos + 6, { align: "left" });
-    pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst / 2, yPos + 6, { align: "center" });
+    pdf.text(item.hsnCode || "", margin + colWidths.serial + colWidths.description + 2, yPos + 6);
+    pdf.text(item.quantity.toString(), margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty / 2, yPos + 6, { align: "center" });
+    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + 2, yPos + 6);
+    pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + colWidths.gst / 2, yPos + 6, { align: "center" });
     pdf.text(item.totalAmount.toFixed(2), amountRightX, yPos + 6, { align: "right" });
-    // Items left column
     if (item.itemsLeft) {
-      pdf.text(item.itemsLeft, margin + colWidths.serial + colWidths.description + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + colWidths.itemsLeft / 2, yPos + 6, { align: "center" });
+      pdf.text(item.itemsLeft, margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + colWidths.itemsLeft / 2, yPos + 6, { align: "center" });
     }
     
     yPos += 9;
   });
 
-  // Total row only (removed subtotal, CGST, SGST) - aligned under amount column
+  // Total row with CGST/SGST
   pdf.setDrawColor(0, 0, 0);
   pdf.setLineWidth(0.4);
   pdf.rect(margin, yPos, tableWidth, 9);
   
-  pdf.setTextColor(0, 0, 0);
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(9);
-  pdf.text("TOTAL", margin + colWidths.serial + 2, yPos + 6);
+  pdf.setFontSize(8);
+  
+  const cgstSgstText = summary.isInterstate ? 
+    `IGST: ₹${summary.igst.toFixed(2)}` : 
+    `CGST: ₹${summary.cgst.toFixed(2)} | SGST: ₹${summary.sgst.toFixed(2)}`;
+  
+  pdf.text(cgstSgstText, margin + colWidths.serial + 2, yPos + 6);
+  pdf.text("TOTAL", margin + colWidths.serial + colWidths.description + colWidths.hsn + 2, yPos + 6);
   pdf.text(summary.total.toFixed(2), amountRightX, yPos + 6, { align: "right" });
   yPos += 12;
   
@@ -287,10 +318,10 @@ export const generateInvoicePDF = async (
     // Save to database if user is logged in
     if (userId) {
       console.log("User is logged in, attempting to save to database");
-      const invoiceNumber = `INV-${Date.now()}`;
+      const invoiceNumberStr = invoiceNumber.toString();
       await supabase.from('invoices').insert({
         user_id: userId,
-        invoice_number: invoiceNumber,
+        invoice_number: invoiceNumberStr,
         business_name: ENTERPRISE_DETAILS.businessName,
         client_name: formData.clientName,
         total_amount: summary.total,
@@ -305,9 +336,9 @@ export const generateInvoicePDF = async (
       console.log("No user logged in, skipping database save");
     }
 
-    // Also store in localStorage for backward compatibility
+    // Also store in localStorage
     const invoiceData = {
-      id: `INV-${Date.now()}`,
+      id: invoiceNumber.toString(),
       clientName: formData.clientName,
       date: new Date().toISOString().split('T')[0],
       total: summary.total,
@@ -319,7 +350,7 @@ export const generateInvoicePDF = async (
     localStorage.setItem('invoiceHistory', JSON.stringify(updatedInvoices));
     
     // Download
-    const fileName = `Invoice_${Date.now()}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    const fileName = `Invoice_${invoiceNumber}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
     console.log("About to download PDF with filename:", fileName);
     pdf.save(fileName);
     console.log("PDF download initiated successfully");
@@ -329,7 +360,7 @@ export const generateInvoicePDF = async (
     console.error('Error saving invoice:', error);
     
     // Still download the PDF even if saving fails
-    const fileName = `Invoice_${Date.now()}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    const fileName = `Invoice_${invoiceNumber}_${formData.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
     pdf.save(fileName);
     
     return false;
