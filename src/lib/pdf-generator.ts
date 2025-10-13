@@ -58,12 +58,12 @@ export const generateInvoicePDF = async (
   const fullWidth = pageWidth - 2 * margin;
 
 
-  // Enterprise Information - Full width
+  // Enterprise Information - Full width (increased height for bank details)
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(250, 250, 250);
-  pdf.rect(margin, yPos, fullWidth, 50, 'F');
+  pdf.rect(margin, yPos, fullWidth, 56, 'F');
   pdf.setDrawColor(220, 220, 220);
-  pdf.rect(margin, yPos, fullWidth, 50);
+  pdf.rect(margin, yPos, fullWidth, 56);
 
   pdf.setFontSize(9);
   pdf.setFont("helvetica", "bold");
@@ -86,16 +86,14 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(7);
   pdf.text(ENTERPRISE_DETAILS.businessAddress, margin + 2, yPos + 25);
   
-  // Phone, State, Vehicle in one row
+  // Phone and State in one row
   pdf.setFontSize(8);
   pdf.text("Phone:", margin + 2, yPos + 30);
-  pdf.text("State:", margin + 40, yPos + 30);
-  pdf.text("Vehicle:", margin + 70, yPos + 30);
+  pdf.text("State:", margin + 50, yPos + 30);
   
   pdf.setFontSize(7);
   pdf.text(ENTERPRISE_DETAILS.businessPhone, margin + 13, yPos + 30);
-  pdf.text("Karnataka", margin + 50, yPos + 30);
-  pdf.text(ENTERPRISE_DETAILS.vehicleNumber, margin + 82, yPos + 30);
+  pdf.text("Karnataka", margin + 59, yPos + 30);
   
   // GST Number and Food License in same row
   pdf.setFontSize(8);
@@ -106,6 +104,22 @@ export const generateInvoicePDF = async (
   pdf.setFont("helvetica", "bold");
   pdf.text(ENTERPRISE_DETAILS.gstNumber, margin + 17, yPos + 35);
   pdf.text(ENTERPRISE_DETAILS.foodLicenseNumber, margin + 66, yPos + 35);
+  
+  // Vehicle Number - aligned to the right side
+  pdf.setFontSize(8);
+  pdf.setFont("helvetica", "normal");
+  const vehicleX = pageWidth - margin - 45;
+  pdf.text("Vehicle No:", vehicleX, yPos + 30);
+  pdf.setFontSize(7);
+  pdf.setFont("helvetica", "bold");
+  pdf.text(ENTERPRISE_DETAILS.vehicleNumber, vehicleX + 20, yPos + 30);
+  
+  // Driver Name below Vehicle
+  pdf.setFontSize(8);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("Driver Name:", vehicleX, yPos + 35);
+  pdf.setFontSize(7);
+  pdf.text("Maruthi N", vehicleX + 22, yPos + 35);
   
   // Email
   pdf.setFontSize(8);
@@ -140,7 +154,7 @@ export const generateInvoicePDF = async (
   pdf.text(ENTERPRISE_DETAILS.ifscCode, bankCol3 + pdf.getTextWidth("IFSC Code:") + 2, bankRowY);
 
   // Customer Information
-  yPos += 52;
+  yPos += 58;
   pdf.setTextColor(0, 0, 0);
   pdf.setFillColor(248, 248, 248);
   pdf.rect(margin, yPos, fullWidth, 26, 'F');
