@@ -114,14 +114,26 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(7);
   pdf.text(ENTERPRISE_DETAILS.businessEmail, margin + 15, yPos + 40);
   
-  // Bank Details Section
+  // Bank Details Section (three clean columns)
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
   pdf.text("Bank Details:", margin + 2, yPos + 45);
-  
+
+  const bankCol1 = margin + 2;
+  const bankCol2 = margin + 48;
+  const bankCol3 = margin + 94;
+
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
-  pdf.text(`${ENTERPRISE_DETAILS.bankName} | A/c: ${ENTERPRISE_DETAILS.accountNumber} | IFSC: ${ENTERPRISE_DETAILS.ifscCode}`, margin + 2, yPos + 49);
+  pdf.text("Bank Name", bankCol1, yPos + 49);
+  pdf.text("Account Number", bankCol2, yPos + 49);
+  pdf.text("IFSC Code", bankCol3, yPos + 49);
+
+  pdf.setFont("helvetica", "bold");
+  pdf.text(ENTERPRISE_DETAILS.bankName, bankCol1, yPos + 53);
+  pdf.setFont("helvetica", "normal");
+  pdf.text(ENTERPRISE_DETAILS.accountNumber, bankCol2, yPos + 53);
+  pdf.text(ENTERPRISE_DETAILS.ifscCode, bankCol3, yPos + 53);
 
   // Customer Information
   yPos += 52;
@@ -164,14 +176,13 @@ export const generateInvoicePDF = async (
   yPos += 28;
   const tableWidth = pageWidth - 2 * margin;
   const colWidths = {
-    serial: tableWidth * 0.07,
-    description: tableWidth * 0.26,
-    hsn: tableWidth * 0.12,
-    qty: tableWidth * 0.07,
-    rate: tableWidth * 0.11,
-    gst: tableWidth * 0.07,
-    amount: tableWidth * 0.18,
-    itemsLeft: tableWidth * 0.12
+    serial: tableWidth * 0.08,
+    description: tableWidth * 0.38,
+    hsn: tableWidth * 0.14,
+    qty: tableWidth * 0.08,
+    rate: tableWidth * 0.12,
+    gst: tableWidth * 0.08,
+    amount: tableWidth * 0.12,
   };
 
   // Precompute Amount column edges
@@ -193,7 +204,6 @@ export const generateInvoicePDF = async (
   pdf.text("RATE", margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + 2, yPos + 7);
   pdf.text("GST%", margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + 2, yPos + 7);
   pdf.text("AMOUNT", amountRightX, yPos + 7, { align: "right" });
-  pdf.text("LEFT", margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + 2, yPos + 7);
 
   // Table content
   yPos += 10;
@@ -201,49 +211,63 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(7);
   
   formData.items.forEach((item, index) => {
-    if (yPos > pageHeight - 30) {
+    if (yPos > pageHeight - 40) {
       pdf.addPage();
       yPos = 25;
     }
-    
+
+    // Split long descriptions and compute dynamic row height
+    const descX = margin + colWidths.serial + 2;
+    const descMaxWidth = colWidths.description - 4;
+    const descLines = pdf.splitTextToSize(item.description || "", descMaxWidth);
+    const lineHeight = 3.5;
+    const rowHeight = Math.max(9, descLines.length * lineHeight + 2);
+
     pdf.setDrawColor(0, 0, 0);
     pdf.setLineWidth(0.3);
-    pdf.rect(margin, yPos, tableWidth, 9);
-    
-    const description = item.description.length > 16 ? 
-      item.description.substring(0, 16) + '...' : item.description;
-    
-    pdf.text((index + 1).toString(), margin + colWidths.serial / 2, yPos + 6, { align: "center" });
-    pdf.text(description, margin + colWidths.serial + 2, yPos + 6);
-    pdf.text(item.hsnCode || "", margin + colWidths.serial + colWidths.description + 2, yPos + 6);
-    pdf.text(item.quantity.toString(), margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty / 2, yPos + 6, { align: "center" });
-    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + 2, yPos + 6);
-    pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + colWidths.gst / 2, yPos + 6, { align: "center" });
-    pdf.text(item.totalAmount.toFixed(2), amountRightX, yPos + 6, { align: "right" });
-    if (item.itemsLeft) {
-      pdf.text(item.itemsLeft, margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + colWidths.gst + colWidths.amount + colWidths.itemsLeft / 2, yPos + 6, { align: "center" });
-    }
-    
-    yPos += 9;
+    pdf.rect(margin, yPos, tableWidth, rowHeight);
+
+    const baseY = yPos + 5;
+
+    // S. No
+    pdf.text((index + 1).toString(), margin + colWidths.serial / 2, baseY, { align: "center" });
+    // Description (multi-line)
+    pdf.text(descLines, descX, baseY);
+    // HSN
+    pdf.text(item.hsnCode || "", margin + colWidths.serial + colWidths.description + 2, baseY);
+    // Qty
+    pdf.text(item.quantity.toString(), margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty / 2, baseY, { align: "center" });
+    // Rate
+    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + 2, baseY);
+    // GST%
+    pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + colWidths.gst / 2, baseY, { align: "center" });
+    // Amount (right aligned)
+    pdf.text(item.totalAmount.toFixed(2), amountRightX, baseY, { align: "right" });
+
+    yPos += rowHeight;
   });
 
-  // Total row with CGST/SGST
+  // Total row with proper ordering and spacing: TOTAL | CGST/SGST ..... amount
   pdf.setDrawColor(0, 0, 0);
   pdf.setLineWidth(0.4);
   pdf.rect(margin, yPos, tableWidth, 9);
-  
+
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(8);
-  
-  const cgstSgstText = summary.isInterstate ? 
-    `IGST: ₹${summary.igst.toFixed(2)}` : 
-    `CGST: ₹${summary.cgst.toFixed(2)} | SGST: ₹${summary.sgst.toFixed(2)}`;
-  
-  pdf.text(cgstSgstText, margin + colWidths.serial + 2, yPos + 6);
-  pdf.text("TOTAL", margin + colWidths.serial + colWidths.description + colWidths.hsn + 2, yPos + 6);
+
+  const cgstSgstText = summary.isInterstate
+    ? `IGST: ₹${summary.igst.toFixed(2)}`
+    : `CGST: ₹${summary.cgst.toFixed(2)} | SGST: ₹${summary.sgst.toFixed(2)}`;
+
+  const totalLabelX = margin + 2;
+  pdf.text("TOTAL", totalLabelX, yPos + 6);
+  const afterTotalX = totalLabelX + pdf.getTextWidth("TOTAL") + 6;
+  pdf.text(cgstSgstText, afterTotalX, yPos + 6);
+
+  // Final amount aligned to right, preventing overlap
   pdf.text(summary.total.toFixed(2), amountRightX, yPos + 6, { align: "right" });
   yPos += 12;
-  
+
   // Signature section - Client Signature on left, Authorised Signatory on right
   pdf.setTextColor(0, 0, 0);
   pdf.setFontSize(9);
