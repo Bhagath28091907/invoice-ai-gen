@@ -96,9 +96,9 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
         <div className="space-y-4">
           <div className="grid grid-cols-12 gap-3 md:gap-6 text-xs font-medium text-muted-foreground border-b pb-2">
             <div className="col-span-3">Description</div>
-            <div className="col-span-2 text-center pr-2 md:pr-3">HSN</div>
+            <div className="col-span-2 md:col-span-3 text-center pr-2 md:pr-3">HSN</div>
             <div className="col-span-1 text-center">Qty</div>
-            <div className="col-span-2 text-center">Rate</div>
+            <div className="col-span-1 text-center">Rate</div>
             <div className="col-span-1 text-center">GST%</div>
             <div className="col-span-2 text-center">Total</div>
             <div className="col-span-1 text-center">Action</div>
@@ -199,7 +199,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="col-span-2 min-w-[112px] overflow-hidden relative z-0 pr-2 md:pr-3">
+              <div className="col-span-2 md:col-span-3 min-w-[140px] overflow-hidden relative z-0 pr-2 md:pr-3">
                 <Select
                   value={item.hsnCode || ""} 
                   onValueChange={(value) => updateItem(item.id, "hsnCode", value)}
@@ -222,7 +222,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 onChange={(e) => updateItem(item.id, "quantity", parseFloat(e.target.value) || 0)}
               />
               <Input 
-                className="col-span-2 text-sm h-9" 
+                className="col-span-2 md:col-span-1 text-sm h-9" 
                 type="number" 
                 placeholder="0.00"
                 step="0.01"
