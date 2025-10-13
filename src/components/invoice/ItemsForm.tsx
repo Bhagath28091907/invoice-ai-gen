@@ -96,10 +96,10 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
         <div className="space-y-4">
           <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
             <div className="col-span-3">Description</div>
+            <div className="col-span-1 text-center">HSN</div>
             <div className="col-span-1 text-center">Qty</div>
             <div className="col-span-2 text-center">Rate</div>
             <div className="col-span-1 text-center">GST%</div>
-            <div className="col-span-1 text-center">HSN</div>
             <div className="col-span-2 text-center">Total</div>
             <div className="col-span-1 text-center">Left</div>
             <div className="col-span-1 text-center">Action</div>
@@ -200,6 +200,20 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   </PopoverContent>
                 </Popover>
               </div>
+              <div className="col-span-1 min-w-0">
+                <Select 
+                  value={item.hsnCode || ""} 
+                  onValueChange={(value) => updateItem(item.id, "hsnCode", value)}
+                >
+                  <SelectTrigger className="w-full text-xs h-9">
+                    <SelectValue placeholder="HSN" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="20052000">20052000</SelectItem>
+                    <SelectItem value="21069099">21069099</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <Input 
                 className="col-span-1 min-w-[60px] text-sm h-9" 
                 type="number" 
@@ -231,20 +245,6 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                         {rate.label}
                       </SelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="col-span-1 min-w-0">
-                <Select 
-                  value={item.hsnCode || ""} 
-                  onValueChange={(value) => updateItem(item.id, "hsnCode", value)}
-                >
-                  <SelectTrigger className="w-full text-xs h-9">
-                    <SelectValue placeholder="HSN" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="20052000">20052000</SelectItem>
-                    <SelectItem value="21069099">21069099</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
