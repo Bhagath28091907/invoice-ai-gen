@@ -114,26 +114,30 @@ export const generateInvoicePDF = async (
   pdf.setFontSize(7);
   pdf.text(ENTERPRISE_DETAILS.businessEmail, margin + 15, yPos + 40);
   
-  // Bank Details Section (three clean columns)
+  // Bank Details Section (three clean columns with tidy spacing)
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
   pdf.text("Bank Details:", margin + 2, yPos + 45);
 
+  const bankRowY = yPos + 50;
   const bankCol1 = margin + 2;
-  const bankCol2 = margin + 48;
-  const bankCol3 = margin + 94;
+  const bankCol2 = margin + fullWidth / 3;
+  const bankCol3 = margin + (2 * fullWidth) / 3;
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
-  pdf.text("Bank Name", bankCol1, yPos + 49);
-  pdf.text("Account Number", bankCol2, yPos + 49);
-  pdf.text("IFSC Code", bankCol3, yPos + 49);
+  // labels
+  pdf.text("Bank Name:", bankCol1, bankRowY);
+  pdf.text("Account No.:", bankCol2, bankRowY);
+  pdf.text("IFSC Code:", bankCol3, bankRowY);
 
+  // values (bold) with a small gap after labels
   pdf.setFont("helvetica", "bold");
-  pdf.text(ENTERPRISE_DETAILS.bankName, bankCol1, yPos + 53);
-  pdf.setFont("helvetica", "normal");
-  pdf.text(ENTERPRISE_DETAILS.accountNumber, bankCol2, yPos + 53);
-  pdf.text(ENTERPRISE_DETAILS.ifscCode, bankCol3, yPos + 53);
+  pdf.text(ENTERPRISE_DETAILS.bankName, bankCol1 + pdf.getTextWidth("Bank Name:") + 2, bankRowY);
+  pdf.setFont("helvetica", "bold");
+  pdf.text(ENTERPRISE_DETAILS.accountNumber, bankCol2 + pdf.getTextWidth("Account No.:") + 2, bankRowY);
+  pdf.setFont("helvetica", "bold");
+  pdf.text(ENTERPRISE_DETAILS.ifscCode, bankCol3 + pdf.getTextWidth("IFSC Code:") + 2, bankRowY);
 
   // Customer Information
   yPos += 52;
@@ -177,8 +181,8 @@ export const generateInvoicePDF = async (
   const tableWidth = pageWidth - 2 * margin;
   const colWidths = {
     serial: tableWidth * 0.08,
-    description: tableWidth * 0.38,
-    hsn: tableWidth * 0.14,
+    description: tableWidth * 0.36,
+    hsn: tableWidth * 0.16, // widened for clarity
     qty: tableWidth * 0.08,
     rate: tableWidth * 0.12,
     gst: tableWidth * 0.08,
@@ -247,26 +251,33 @@ export const generateInvoicePDF = async (
     yPos += rowHeight;
   });
 
-  // Total row with proper ordering and spacing: TOTAL | CGST/SGST ..... amount
+  // Total row with proper ordering and spacing: TOTAL | CGST/SGST ... | Final amount
   pdf.setDrawColor(0, 0, 0);
   pdf.setLineWidth(0.4);
-  pdf.rect(margin, yPos, tableWidth, 9);
+  const totalRowHeight = 9;
+  pdf.rect(margin, yPos, tableWidth, totalRowHeight);
 
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(8);
 
-  const cgstSgstText = summary.isInterstate
-    ? `IGST: ₹${summary.igst.toFixed(2)}`
-    : `CGST: ₹${summary.cgst.toFixed(2)} | SGST: ₹${summary.sgst.toFixed(2)}`;
-
+  // Left: TOTAL label
   const totalLabelX = margin + 2;
-  pdf.text("TOTAL", totalLabelX, yPos + 6);
-  const afterTotalX = totalLabelX + pdf.getTextWidth("TOTAL") + 6;
-  pdf.text(cgstSgstText, afterTotalX, yPos + 6);
+  const totalLabelY = yPos + 6;
+  pdf.text("TOTAL", totalLabelX, totalLabelY);
 
-  // Final amount aligned to right, preventing overlap
-  pdf.text(summary.total.toFixed(2), amountRightX, yPos + 6, { align: "right" });
-  yPos += 12;
+  // Middle: CGST/SGST (or IGST) anchored to fixed column positions to avoid overlap
+  const cgstX = margin + tableWidth * 0.45;
+  const sgstX = margin + tableWidth * 0.65;
+  if (summary.isInterstate) {
+    pdf.text(`IGST: ₹${summary.igst.toFixed(2)}`, cgstX, totalLabelY);
+  } else {
+    pdf.text(`CGST: ₹${summary.cgst.toFixed(2)}`, cgstX, totalLabelY);
+    pdf.text(`SGST: ₹${summary.sgst.toFixed(2)}`, sgstX, totalLabelY);
+  }
+
+  // Right: Final amount aligned to the right edge of the Amount column
+  pdf.text(summary.total.toFixed(2), amountRightX, totalLabelY, { align: "right" });
+  yPos += totalRowHeight + 3;
 
   // Signature section - Client Signature on left, Authorised Signatory on right
   pdf.setTextColor(0, 0, 0);

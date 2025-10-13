@@ -207,7 +207,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   <SelectTrigger className="w-full text-sm h-9">
                     <SelectValue placeholder="Select HSN" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background z-[100]">
+                  <SelectContent className="bg-background z-[200] shadow-lg border">
                     <SelectItem value="20052000">20052000</SelectItem>
                     <SelectItem value="21069099">21069099</SelectItem>
                   </SelectContent>
