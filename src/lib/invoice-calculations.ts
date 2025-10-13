@@ -21,6 +21,7 @@ export const calculateItemAmounts = (item: Partial<InvoiceItem>): InvoiceItem =>
     gstAmount,
     totalAmount,
   };
+};
 
 export const calculateInvoiceSummary = (
   items: InvoiceItem[],

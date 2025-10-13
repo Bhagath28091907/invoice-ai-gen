@@ -199,8 +199,8 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="col-span-2">
-                <Select 
+              <div className="col-span-2 min-w-[140px]">
+                <Select
                   value={item.hsnCode || ""} 
                   onValueChange={(value) => updateItem(item.id, "hsnCode", value)}
                 >
