@@ -283,10 +283,10 @@ export const generateInvoicePDF = async (
   const cgstX = margin + tableWidth * 0.38;
   const sgstX = margin + tableWidth * 0.64;
   if (summary.isInterstate) {
-    pdf.text(`IGST: ₹${summary.igst.toFixed(2)}`, cgstX, totalLabelY);
+    pdf.text(`IGST: ${summary.igst.toFixed(2)}`, cgstX, totalLabelY);
   } else {
-    pdf.text(`CGST: ₹${summary.cgst.toFixed(2)}`, cgstX, totalLabelY);
-    pdf.text(`SGST: ₹${summary.sgst.toFixed(2)}`, sgstX, totalLabelY);
+    pdf.text(`CGST: ${summary.cgst.toFixed(2)}`, cgstX, totalLabelY);
+    pdf.text(`SGST: ${summary.sgst.toFixed(2)}`, sgstX, totalLabelY);
   }
 
   // Right: Final amount aligned to the right edge of the Amount column

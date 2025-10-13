@@ -199,12 +199,12 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="col-span-2">
+              <div className="col-span-2 min-w-[128px] overflow-hidden">
                 <Select
                   value={item.hsnCode || ""} 
                   onValueChange={(value) => updateItem(item.id, "hsnCode", value)}
                 >
-                  <SelectTrigger className="w-full text-sm h-9">
+                  <SelectTrigger className="w-full text-sm h-9 truncate">
                     <SelectValue placeholder="Select HSN" />
                   </SelectTrigger>
                   <SelectContent className="bg-background z-[200] shadow-lg border">
@@ -214,7 +214,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 </Select>
               </div>
               <Input 
-                className="col-span-1 text-sm h-9"
+                className="col-span-1 text-sm h-9 relative z-10"
                 type="number" 
                 placeholder="1"
                 min="0"
