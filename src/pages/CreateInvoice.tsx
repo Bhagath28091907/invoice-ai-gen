@@ -18,6 +18,7 @@ const invoiceSchema = z.object({
   clientName: z.string().min(1, "Customer name is required"),
   clientAddress: z.string().min(1, "Customer address is required"),
   clientPhone: z.string().min(1, "Customer phone is required"),
+  clientGstNumber: z.string().optional(),
   items: z.array(z.any()).min(1, "At least one item is required"),
   notes: z.string().optional(),
 });
@@ -42,10 +43,12 @@ const CreateInvoice = () => {
 
   const form = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceSchema),
+    mode: "onChange",
     defaultValues: {
       clientName: "",
       clientAddress: "",
       clientPhone: "",
+      clientGstNumber: "",
       items: [],
       notes: "",
     },
@@ -60,11 +63,11 @@ const CreateInvoice = () => {
     if (editData) {
       try {
         const { formData } = JSON.parse(editData);
-        setValue('clientName', formData.clientName);
-        setValue('clientAddress', formData.clientAddress);
-        setValue('clientPhone', formData.clientPhone);
-        setValue('clientGstNumber', formData.clientGstNumber || '');
-        setValue('notes', formData.notes || '');
+        setValue('clientName', formData.clientName, { shouldValidate: true });
+        setValue('clientAddress', formData.clientAddress, { shouldValidate: true });
+        setValue('clientPhone', formData.clientPhone, { shouldValidate: true });
+        setValue('clientGstNumber', formData.clientGstNumber || '', { shouldValidate: true });
+        setValue('notes', formData.notes || '', { shouldValidate: true });
         setItems(formData.items);
         sessionStorage.removeItem('editInvoiceData');
         toast({
