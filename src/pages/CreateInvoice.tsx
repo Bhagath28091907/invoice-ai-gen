@@ -82,7 +82,7 @@ const CreateInvoice = () => {
 
   // Update items in form when items state changes
   useEffect(() => {
-    setValue("items", items);
+    setValue("items", items, { shouldValidate: true });
   }, [items, setValue]);
 
   // Calculate summary whenever items change (always use Karnataka state for enterprise)
@@ -92,12 +92,15 @@ const CreateInvoice = () => {
     "karnataka"  // Simplified - all invoices treated as same state
   );
 
-  // Check if form is valid for PDF generation (removed credit requirement)
-  const canGeneratePDF = isValid && items.length > 0 && items.some(item => 
-    item.description && item.quantity > 0 && item.rate > 0
+  // Check if form is valid for PDF generation (do not rely solely on RHF isValid)
+  const canGeneratePDF = (
+    items.length > 0 &&
+    items.some(item => item.description && item.quantity > 0 && item.rate > 0) &&
+    !!watchedValues.clientName && !!watchedValues.clientAddress && !!watchedValues.clientPhone
   );
 
   const handleGeneratePDF = async () => {
+    const currentValues = form.getValues();
     console.log("Generate PDF clicked - Full Debug", { 
       isValid, 
       itemsLength: items.length, 
@@ -106,7 +109,7 @@ const CreateInvoice = () => {
       credits,
       canGeneratePDF,
       formErrors: errors,
-      watchedValues: watchedValues,
+      currentValues,
       items: items
     });
     
