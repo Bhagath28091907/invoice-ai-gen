@@ -95,6 +95,68 @@ export type Database = {
         }
         Relationships: []
       }
+      route_customers: {
+        Row: {
+          created_at: string
+          customer_address: string
+          customer_gst_number: string | null
+          customer_name: string
+          customer_phone: string
+          id: string
+          route_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_address: string
+          customer_gst_number?: string | null
+          customer_name: string
+          customer_phone: string
+          id?: string
+          route_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_address?: string
+          customer_gst_number?: string | null
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          route_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_customers_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routes: {
+        Row: {
+          created_at: string
+          id: string
+          route_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          route_name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          route_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_credits: {
         Row: {
           created_at: string

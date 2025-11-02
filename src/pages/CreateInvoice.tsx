@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Toaster } from "@/components/ui/toaster";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ClientInformationForm } from "@/components/invoice/ClientInformationForm";
 import { EnterpriseDetailsCard } from "@/components/invoice/EnterpriseDetailsCard";
 import { ItemsForm } from "@/components/invoice/ItemsForm";
@@ -13,6 +14,10 @@ import { generateInvoicePDF } from "@/lib/pdf-generator";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useRoutes } from "@/hooks/useRoutes";
+import { useRouteCustomers } from "@/hooks/useRouteCustomers";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const invoiceSchema = z.object({
   clientName: z.string().min(1, "Customer name is required"),
@@ -26,6 +31,11 @@ const invoiceSchema = z.object({
 const CreateInvoice = () => {
   const { user, credits, isUnlimited, refreshCredits } = useAuth();
   const { toast } = useToast();
+  const { routes } = useRoutes(user?.id);
+  const [selectedRouteId, setSelectedRouteId] = useState<string>("");
+  const { customers } = useRouteCustomers(user?.id, selectedRouteId);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
+  
   const [items, setItems] = useState<InvoiceItem[]>([
     {
       id: `item-${Date.now()}`,
@@ -56,6 +66,19 @@ const CreateInvoice = () => {
 
   const { register, handleSubmit, setValue, watch, formState: { errors, isValid } } = form;
   const watchedValues = watch();
+
+  // Handle customer selection
+  useEffect(() => {
+    if (selectedCustomerId) {
+      const customer = customers.find(c => c.id === selectedCustomerId);
+      if (customer) {
+        setValue('clientName', customer.customer_name, { shouldValidate: true });
+        setValue('clientAddress', customer.customer_address, { shouldValidate: true });
+        setValue('clientPhone', customer.customer_phone, { shouldValidate: true });
+        setValue('clientGstNumber', customer.customer_gst_number || '', { shouldValidate: true });
+      }
+    }
+  }, [selectedCustomerId, customers, setValue]);
 
   // Load invoice data for editing if available
   useEffect(() => {
@@ -175,6 +198,51 @@ const CreateInvoice = () => {
         <form className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <EnterpriseDetailsCard />
+            
+            {/* Route and Customer Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Select Customer</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="route">Select Route</Label>
+                  <Select value={selectedRouteId} onValueChange={(value) => {
+                    setSelectedRouteId(value);
+                    setSelectedCustomerId("");
+                  }}>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Choose a route" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border z-50">
+                      {routes.map((route) => (
+                        <SelectItem key={route.id} value={route.id}>
+                          {route.route_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {selectedRouteId && (
+                  <div className="space-y-2">
+                    <Label htmlFor="customer">Select Customer</Label>
+                    <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Choose a customer" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover border z-50">
+                        {customers.map((customer) => (
+                          <SelectItem key={customer.id} value={customer.id}>
+                            {customer.customer_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
             
             <ClientInformationForm 
               register={register} 

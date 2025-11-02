@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { FileText, Calculator, History, Info, LogOut, User, Package } from "lucide-react";
+import { FileText, Calculator, History, Info, LogOut, User, Package, MapPin } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import CreditsDisplay from "./CreditsDisplay";
@@ -19,6 +19,7 @@ const Header = () => {
     { name: "Create Invoice", href: "/create", icon: Calculator },
     { name: "History", href: "/history", icon: History },
     { name: "Items", href: "/items", icon: Package },
+    { name: "Routes", href: "/routes", icon: MapPin },
     { name: "About", href: "/about", icon: Info },
   ];
 
