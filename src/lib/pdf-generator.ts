@@ -190,21 +190,22 @@ export const generateInvoicePDF = async (
     pdf.text(`GST No: ${formData.clientGstNumber}`, margin + 2, clientYPos);
   }
 
-  // Items Table with HSN column
+  // Items Table with HSN and UOM columns
   yPos += 28;
   const tableWidth = pageWidth - 2 * margin;
   const colWidths = {
-    serial: tableWidth * 0.08,
-    description: tableWidth * 0.36,
-    hsn: tableWidth * 0.16, // widened for clarity
+    serial: tableWidth * 0.07,
+    description: tableWidth * 0.29,
+    hsn: tableWidth * 0.13,
     qty: tableWidth * 0.08,
-    rate: tableWidth * 0.12,
+    uom: tableWidth * 0.08,
+    rate: tableWidth * 0.11,
     gst: tableWidth * 0.08,
-    amount: tableWidth * 0.12,
+    amount: tableWidth * 0.16,
   };
 
   // Precompute Amount column edges
-  const amountStartX = margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + colWidths.gst;
+  const amountStartX = margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.uom + colWidths.rate + colWidths.gst;
   const amountRightX = amountStartX + colWidths.amount - 2;
 
   // Table header
@@ -219,8 +220,9 @@ export const generateInvoicePDF = async (
   pdf.text("DESCRIPTION", margin + colWidths.serial + 2, yPos + 7);
   pdf.text("HSN", margin + colWidths.serial + colWidths.description + 2, yPos + 7);
   pdf.text("QTY", margin + colWidths.serial + colWidths.description + colWidths.hsn + 2, yPos + 7);
-  pdf.text("RATE", margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + 2, yPos + 7);
-  pdf.text("GST%", margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + 2, yPos + 7);
+  pdf.text("UOM", margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + 2, yPos + 7);
+  pdf.text("RATE", margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.uom + 2, yPos + 7);
+  pdf.text("GST%", margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.uom + colWidths.rate + 2, yPos + 7);
   pdf.text("AMOUNT", amountRightX, yPos + 7, { align: "right" });
 
   // Table content
@@ -255,10 +257,12 @@ export const generateInvoicePDF = async (
     pdf.text(item.hsnCode || "", margin + colWidths.serial + colWidths.description + 2, baseY);
     // Qty
     pdf.text(item.quantity.toString(), margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty / 2, baseY, { align: "center" });
+    // UOM
+    pdf.text(item.uom || "BOX", margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.uom / 2, baseY, { align: "center" });
     // Rate
-    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + 2, baseY);
+    pdf.text(item.rate.toFixed(2), margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.uom + 2, baseY);
     // GST%
-    pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.rate + colWidths.gst / 2, baseY, { align: "center" });
+    pdf.text(`${item.gstRate}%`, margin + colWidths.serial + colWidths.description + colWidths.hsn + colWidths.qty + colWidths.uom + colWidths.rate + colWidths.gst / 2, baseY, { align: "center" });
     // Amount (right aligned)
     pdf.text(item.totalAmount.toFixed(2), amountRightX, baseY, { align: "right" });
 

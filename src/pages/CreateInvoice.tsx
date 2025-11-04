@@ -41,6 +41,7 @@ const CreateInvoice = () => {
       id: `item-${Date.now()}`,
       description: "",
       quantity: 1,
+      uom: "BOX",
       rate: 0,
       gstRate: 0,
       hsnCode: "",
@@ -189,7 +190,7 @@ const CreateInvoice = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Create GST Invoice</h1>
           <p className="text-muted-foreground">Generate professional GST-compliant invoices with automatic calculations</p>

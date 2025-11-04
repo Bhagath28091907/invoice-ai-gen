@@ -2,6 +2,7 @@ export interface InvoiceItem {
   id: string;
   description: string;
   quantity: number;
+  uom: string; // Unit of Measurement
   rate: number;
   gstRate: number;
   hsnCode?: string; // HSN code field

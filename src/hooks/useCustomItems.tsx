@@ -2,8 +2,17 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+export interface CustomItem {
+  item_name: string;
+  category: 'namkeen' | 'chips';
+  default_hsn?: string;
+  default_rate?: number;
+  default_gst?: number;
+  default_uom?: string;
+}
+
 export const useCustomItems = (userId: string | undefined) => {
-  const [customItems, setCustomItems] = useState<string[]>([]);
+  const [customItems, setCustomItems] = useState<CustomItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -14,25 +23,38 @@ export const useCustomItems = (userId: string | undefined) => {
   }, [userId]);
 
   const fetchCustomItems = async () => {
+    if (!userId) return;
+    
+    setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from("custom_items")
-        .select("item_name")
-        .order("item_name");
+        .from('custom_items')
+        .select('item_name, category, default_hsn, default_rate, default_gst, default_uom')
+        .eq('user_id', userId)
+        .order('item_name', { ascending: true });
 
       if (error) throw error;
-
-      setCustomItems(data?.map(item => item.item_name) || []);
+      
+      setCustomItems((data || []) as CustomItem[]);
     } catch (error) {
-      console.error("Error fetching custom items:", error);
+      console.error('Error fetching custom items:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const addCustomItem = async (itemName: string) => {
+  const addCustomItem = async (
+    itemName: string, 
+    category: 'namkeen' | 'chips',
+    defaultHsn?: string,
+    defaultRate?: number,
+    defaultGst?: number,
+    defaultUom?: string
+  ): Promise<boolean> => {
     if (!userId) {
       toast({
-        title: "Authentication required",
-        description: "Please sign in to add custom items",
+        title: "Error",
+        description: "You must be logged in to add items",
         variant: "destructive",
       });
       return false;
@@ -41,32 +63,41 @@ export const useCustomItems = (userId: string | undefined) => {
     setIsLoading(true);
     try {
       const { error } = await supabase
-        .from("custom_items")
-        .insert({ user_id: userId, item_name: itemName });
+        .from('custom_items')
+        .insert([{ 
+          user_id: userId, 
+          item_name: itemName,
+          category,
+          default_hsn: defaultHsn || null,
+          default_rate: defaultRate || 0,
+          default_gst: defaultGst || 0,
+          default_uom: defaultUom || 'BOX'
+        }]);
 
       if (error) {
-        if (error.code === "23505") {
+        if (error.code === '23505') {
           toast({
             title: "Item already exists",
-            description: "This item is already in your list",
+            description: "This item name is already in your list",
             variant: "destructive",
           });
-          return false;
+        } else {
+          throw error;
         }
-        throw error;
+        return false;
       }
 
-      setCustomItems(prev => [...prev, itemName].sort());
+      await fetchCustomItems();
       toast({
         title: "Item added",
-        description: `"${itemName}" has been added to your items list`,
+        description: `${itemName} has been added to your items`,
       });
       return true;
     } catch (error) {
-      console.error("Error adding custom item:", error);
+      console.error('Error adding custom item:', error);
       toast({
-        title: "Error",
-        description: "Failed to add custom item",
+        title: "Error adding item",
+        description: "Please try again",
         variant: "destructive",
       });
       return false;
@@ -75,11 +106,18 @@ export const useCustomItems = (userId: string | undefined) => {
     }
   };
 
-  const updateCustomItem = async (oldName: string, newName: string) => {
+  const updateCustomItem = async (
+    oldName: string, 
+    newName: string,
+    defaultHsn?: string,
+    defaultRate?: number,
+    defaultGst?: number,
+    defaultUom?: string
+  ): Promise<boolean> => {
     if (!userId) {
       toast({
-        title: "Authentication required",
-        description: "Please sign in to update items",
+        title: "Error",
+        description: "You must be logged in to update items",
         variant: "destructive",
       });
       return false;
@@ -88,24 +126,30 @@ export const useCustomItems = (userId: string | undefined) => {
     setIsLoading(true);
     try {
       const { error } = await supabase
-        .from("custom_items")
-        .update({ item_name: newName })
-        .eq("user_id", userId)
-        .eq("item_name", oldName);
+        .from('custom_items')
+        .update({ 
+          item_name: newName,
+          default_hsn: defaultHsn || null,
+          default_rate: defaultRate || 0,
+          default_gst: defaultGst || 0,
+          default_uom: defaultUom || 'BOX'
+        })
+        .eq('user_id', userId)
+        .eq('item_name', oldName);
 
       if (error) throw error;
 
-      setCustomItems(prev => prev.map(item => item === oldName ? newName : item).sort());
+      await fetchCustomItems();
       toast({
         title: "Item updated",
-        description: `Item renamed to "${newName}"`,
+        description: `Item has been updated successfully`,
       });
       return true;
     } catch (error) {
-      console.error("Error updating custom item:", error);
+      console.error('Error updating custom item:', error);
       toast({
-        title: "Error",
-        description: "Failed to update item",
+        title: "Error updating item",
+        description: "Please try again",
         variant: "destructive",
       });
       return false;
@@ -114,11 +158,11 @@ export const useCustomItems = (userId: string | undefined) => {
     }
   };
 
-  const deleteCustomItem = async (itemName: string) => {
+  const deleteCustomItem = async (itemName: string): Promise<boolean> => {
     if (!userId) {
       toast({
-        title: "Authentication required",
-        description: "Please sign in to delete items",
+        title: "Error",
+        description: "You must be logged in to delete items",
         variant: "destructive",
       });
       return false;
@@ -127,24 +171,24 @@ export const useCustomItems = (userId: string | undefined) => {
     setIsLoading(true);
     try {
       const { error } = await supabase
-        .from("custom_items")
+        .from('custom_items')
         .delete()
-        .eq("user_id", userId)
-        .eq("item_name", itemName);
+        .eq('user_id', userId)
+        .eq('item_name', itemName);
 
       if (error) throw error;
 
-      setCustomItems(prev => prev.filter(item => item !== itemName));
+      await fetchCustomItems();
       toast({
         title: "Item deleted",
-        description: `"${itemName}" has been removed`,
+        description: `${itemName} has been removed`,
       });
       return true;
     } catch (error) {
-      console.error("Error deleting custom item:", error);
+      console.error('Error deleting custom item:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete item",
+        title: "Error deleting item",
+        description: "Please try again",
         variant: "destructive",
       });
       return false;

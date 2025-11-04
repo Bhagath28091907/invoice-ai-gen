@@ -4,11 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Trash2, Check, ChevronsUpDown } from "lucide-react";
 import { InvoiceItem } from "@/types/invoice";
 import { calculateItemAmounts } from "@/lib/invoice-calculations";
-import { PREDEFINED_ITEMS } from "@/constants/items";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useCustomItems } from "@/hooks/useCustomItems";
@@ -29,25 +27,11 @@ const GST_RATES = [
 
 export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
   const { user } = useAuth();
-  const { customItems, addCustomItem, isLoading } = useCustomItems(user?.id);
+  const { customItems, isLoading } = useCustomItems(user?.id);
   const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({});
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newItemName, setNewItemName] = useState("");
-
-  const allItems = [...PREDEFINED_ITEMS, ...customItems].sort();
 
   const togglePopover = (itemId: string, open: boolean) => {
     setOpenPopovers(prev => ({ ...prev, [itemId]: open }));
-  };
-
-  const handleAddNewItem = async () => {
-    if (!newItemName.trim()) return;
-    
-    const success = await addCustomItem(newItemName.trim());
-    if (success) {
-      setNewItemName("");
-      setIsDialogOpen(false);
-    }
   };
 
   const addItem = () => {
@@ -55,6 +39,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       description: "",
       quantity: 1,
+      uom: "BOX",
       rate: 0,
       gstRate: 0,
       hsnCode: "",
@@ -81,6 +66,35 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
     onItemsChange(updatedItems);
   };
 
+  // Handle item selection with auto-population
+  const handleItemSelect = (itemId: string, itemName: string) => {
+    const selectedCustomItem = customItems.find(ci => ci.item_name === itemName);
+    
+    if (selectedCustomItem) {
+      // Auto-populate default values
+      const updatedItems = items.map(item => {
+        if (item.id === itemId) {
+          const updatedItem = {
+            ...item,
+            description: itemName,
+            hsnCode: selectedCustomItem.default_hsn || item.hsnCode,
+            rate: selectedCustomItem.default_rate || item.rate,
+            gstRate: selectedCustomItem.default_gst || item.gstRate,
+            uom: selectedCustomItem.default_uom || item.uom,
+          };
+          return calculateItemAmounts(updatedItem);
+        }
+        return item;
+      });
+      onItemsChange(updatedItems);
+    } else {
+      // Just update the description
+      updateItem(itemId, "description", itemName);
+    }
+    
+    togglePopover(itemId, false);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -94,14 +108,15 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="grid grid-cols-12 gap-3 md:gap-6 text-xs font-medium text-muted-foreground border-b pb-2">
-            <div className="col-span-3">Description</div>
-            <div className="col-span-1 text-center">HSN</div>
-            <div className="col-span-2 text-center">Qty</div>
-            <div className="col-span-2 text-center">Rate</div>
-            <div className="col-span-1 text-center">GST%</div>
-            <div className="col-span-2 text-center">Total</div>
-            <div className="col-span-1 text-center">Action</div>
+          <div className="grid grid-cols-[2fr_1fr_1fr_0.8fr_1fr_1fr_1fr_0.5fr] gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
+            <div>Description</div>
+            <div className="text-center">HSN</div>
+            <div className="text-center">Qty</div>
+            <div className="text-center">UOM</div>
+            <div className="text-center">Rate</div>
+            <div className="text-center">GST%</div>
+            <div className="text-center">Total</div>
+            <div className="text-center">Action</div>
           </div>
           
           {items.length === 0 && (
@@ -111,8 +126,8 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
           )}
           
           {items.map((item, index) => (
-            <div key={item.id} className="grid grid-cols-12 gap-3 md:gap-6 items-center py-3 border-b border-gray-100">
-              <div className="col-span-3 min-w-0">
+            <div key={item.id} className="grid grid-cols-[2fr_1fr_1fr_0.8fr_1fr_1fr_1fr_0.5fr] gap-2 items-center py-3 border-b border-gray-100">
+              <div className="min-w-0">
                 <Popover open={openPopovers[item.id]} onOpenChange={(open) => togglePopover(item.id, open)}>
                   <PopoverTrigger asChild>
                     <Button
@@ -129,68 +144,25 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                     <Command className="bg-background">
                       <CommandInput placeholder="Search items..." className="h-9" />
                       <CommandList className="max-h-[300px]">
-                        <CommandGroup>
-                          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                            <DialogTrigger asChild>
-                              <CommandItem
-                                onSelect={() => {
-                                  setIsDialogOpen(true);
-                                }}
-                                className="bg-primary/10 hover:bg-primary/20 font-medium cursor-pointer"
-                              >
-                                <Plus className="w-4 h-4 mr-2" />
-                                Add New Item
-                              </CommandItem>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Add New Item</DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-4 py-4">
-                                <Input
-                                  placeholder="Enter item name"
-                                  value={newItemName}
-                                  onChange={(e) => setNewItemName(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                      handleAddNewItem();
-                                    }
-                                  }}
-                                />
-                              </div>
-                              <DialogFooter>
-                                <Button
-                                  onClick={handleAddNewItem}
-                                  disabled={!newItemName.trim() || isLoading}
-                                >
-                                  {isLoading ? "Adding..." : "Add Item"}
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        </CommandGroup>
                         <CommandEmpty>
                           <div className="text-center py-4">
                             <p className="text-sm text-muted-foreground">No item found.</p>
                           </div>
                         </CommandEmpty>
                         <CommandGroup>
-                          {allItems.map((itemName) => (
+                          {customItems.map((customItem) => (
                             <CommandItem
-                              key={itemName}
-                              value={itemName}
-                              onSelect={(currentValue) => {
-                                updateItem(item.id, "description", currentValue);
-                                togglePopover(item.id, false);
-                              }}
+                              key={customItem.item_name}
+                              value={customItem.item_name}
+                              onSelect={() => handleItemSelect(item.id, customItem.item_name)}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  item.description === itemName ? "opacity-100" : "opacity-0"
+                                  item.description === customItem.item_name ? "opacity-100" : "opacity-0"
                                 )}
                               />
-                              {itemName}
+                              {customItem.item_name}
                             </CommandItem>
                           ))}
                         </CommandGroup>
@@ -199,13 +171,13 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="col-span-1 overflow-hidden relative z-0">
+              <div className="overflow-hidden relative z-0">
                 <Select
                   value={item.hsnCode || ""} 
                   onValueChange={(value) => updateItem(item.id, "hsnCode", value)}
                 >
-                  <SelectTrigger className="w-[120px] text-sm h-9 truncate">
-                    <SelectValue placeholder="Select HSN" />
+                  <SelectTrigger className="w-full text-sm h-9 truncate">
+                    <SelectValue placeholder="HSN" />
                   </SelectTrigger>
                   <SelectContent className="bg-background z-[200] shadow-lg border">
                     <SelectItem value="20052000">20052000</SelectItem>
@@ -214,7 +186,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 </Select>
               </div>
               <Input 
-                className="col-span-2 text-sm h-9 relative z-30"
+                className="text-sm h-9 relative z-30"
                 type="number" 
                 placeholder="1"
                 min="0"
@@ -222,7 +194,14 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 onChange={(e) => updateItem(item.id, "quantity", parseFloat(e.target.value) || 0)}
               />
               <Input 
-                className="col-span-2 text-sm h-9"
+                className="text-xs h-9"
+                type="text" 
+                placeholder="BOX"
+                value={item.uom}
+                onChange={(e) => updateItem(item.id, "uom", e.target.value)}
+              />
+              <Input 
+                className="text-sm h-9"
                 type="number" 
                 placeholder="0.00"
                 step="0.01"
@@ -230,7 +209,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 value={item.rate}
                 onChange={(e) => updateItem(item.id, "rate", parseFloat(e.target.value) || 0)}
               />
-              <div className="col-span-1">
+              <div>
                 <Select 
                   value={item.gstRate.toString()} 
                   onValueChange={(value) => updateItem(item.id, "gstRate", parseInt(value))}
@@ -247,10 +226,10 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-2 flex items-center justify-center text-sm font-medium">
+              <div className="flex items-center justify-center text-sm font-medium">
                 ₹{item.totalAmount.toFixed(2)}
               </div>
-              <div className="col-span-1 flex justify-center">
+              <div className="flex justify-center">
                 <Button
                   type="button"
                   variant="ghost"

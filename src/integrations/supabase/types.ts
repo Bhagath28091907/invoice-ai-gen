@@ -16,19 +16,34 @@ export type Database = {
     Tables: {
       custom_items: {
         Row: {
+          category: string
           created_at: string
+          default_gst: number | null
+          default_hsn: string | null
+          default_rate: number | null
+          default_uom: string | null
           id: string
           item_name: string
           user_id: string
         }
         Insert: {
+          category?: string
           created_at?: string
+          default_gst?: number | null
+          default_hsn?: string | null
+          default_rate?: number | null
+          default_uom?: string | null
           id?: string
           item_name: string
           user_id: string
         }
         Update: {
+          category?: string
           created_at?: string
+          default_gst?: number | null
+          default_hsn?: string | null
+          default_rate?: number | null
+          default_uom?: string | null
           id?: string
           item_name?: string
           user_id?: string

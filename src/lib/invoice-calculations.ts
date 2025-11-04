@@ -12,6 +12,7 @@ export const calculateItemAmounts = (item: Partial<InvoiceItem>): InvoiceItem =>
   return {
     id: item.id || "",
     description: item.description || "",
+    uom: item.uom || "BOX",
     hsnCode: item.hsnCode || "",
     itemsLeft: item.itemsLeft || "",
     quantity,
