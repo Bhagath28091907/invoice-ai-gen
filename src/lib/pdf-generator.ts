@@ -4,6 +4,24 @@ import html2canvas from "html2canvas";
 import { InvoiceFormData, InvoiceSummary, ENTERPRISE_DETAILS } from "@/types/invoice";
 import { numberToWords } from "./invoice-calculations";
 import { supabase } from "@/integrations/supabase/client";
+import logoAsset from "@/assets/kalyani-logo.jpeg.asset.json";
+
+const loadLogoDataUrl = async (): Promise<string | null> => {
+  try {
+    const res = await fetch(logoAsset.url);
+    const blob = await res.blob();
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    console.error("Failed to load logo", e);
+    return null;
+  }
+};
+
 
 export const generateInvoicePDF = async (
   formData: InvoiceFormData,
@@ -44,18 +62,33 @@ export const generateInvoicePDF = async (
   pdf.setFont("helvetica", "bold");
   pdf.setTextColor(0, 0, 0);
   pdf.text(`Invoice No: ${invoiceNumber}`, margin, yPos);
-  
-  // Date - Top Right
-  pdf.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, pageWidth - margin, yPos, { align: "right" });
-  
-  // Header
-  yPos = 15;
+
+  // Date - directly below Invoice Number
+  yPos += 5;
+  pdf.setFontSize(9);
+  pdf.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, margin, yPos);
+
+  // Logo - Top Right (small, won't overlap Bill From below)
+  const logoDataUrl = await loadLogoDataUrl();
+  if (logoDataUrl) {
+    const logoSize = 18;
+    try {
+      pdf.addImage(logoDataUrl, "JPEG", pageWidth - margin - logoSize, 4, logoSize, logoSize);
+    } catch (e) {
+      console.error("addImage failed", e);
+    }
+  }
+
+  // Header - TAX INVOICE centered
+  yPos = 28;
   pdf.setFontSize(14);
+  pdf.setFont("helvetica", "bold");
   pdf.text("TAX INVOICE", pageWidth / 2, yPos, { align: "center" });
-  
+
   // Full width layout
-  yPos = 20;
+  yPos = 33;
   const fullWidth = pageWidth - 2 * margin;
+
 
 
   // Enterprise Information - Full width (increased height for bank details)
