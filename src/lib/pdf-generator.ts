@@ -63,31 +63,36 @@ export const generateInvoicePDF = async (
   pdf.setTextColor(0, 0, 0);
   pdf.text(`Invoice No: ${invoiceNumber}`, margin, yPos);
 
-  // Date - directly below Invoice Number
-  yPos += 5;
-  pdf.setFontSize(9);
-  pdf.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, margin, yPos);
+  // Date - Top Right (same row as Invoice No, original layout)
+  pdf.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, pageWidth - margin, yPos, { align: "right" });
 
-  // Logo - Top Right (small, won't overlap Bill From below)
+  // Logo - centered between Invoice No and Date, small so it doesn't push other elements
   const logoDataUrl = await loadLogoDataUrl();
   if (logoDataUrl) {
-    const logoSize = 18;
+    const logoSize = 9; // mm — small, fits within the top row
     try {
-      pdf.addImage(logoDataUrl, "JPEG", pageWidth - margin - logoSize, 4, logoSize, logoSize);
+      pdf.addImage(
+        logoDataUrl,
+        "JPEG",
+        (pageWidth - logoSize) / 2,
+        yPos - 6,
+        logoSize,
+        logoSize
+      );
     } catch (e) {
       console.error("addImage failed", e);
     }
   }
 
-  // Header - TAX INVOICE centered
-  yPos = 28;
+  // Header - TAX INVOICE centered (original position)
+  yPos = 15;
   pdf.setFontSize(14);
-  pdf.setFont("helvetica", "bold");
   pdf.text("TAX INVOICE", pageWidth / 2, yPos, { align: "center" });
 
-  // Full width layout
-  yPos = 33;
+  // Full width layout (original position)
+  yPos = 20;
   const fullWidth = pageWidth - 2 * margin;
+
 
 
 
