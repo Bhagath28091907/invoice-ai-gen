@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Users can insert their own credits" ON public.user_credits;
