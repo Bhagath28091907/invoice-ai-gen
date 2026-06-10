@@ -4,6 +4,24 @@ import html2canvas from "html2canvas";
 import { InvoiceFormData, InvoiceSummary, ENTERPRISE_DETAILS } from "@/types/invoice";
 import { numberToWords } from "./invoice-calculations";
 import { supabase } from "@/integrations/supabase/client";
+import logoAsset from "@/assets/kalyani-logo.jpeg.asset.json";
+
+const loadLogoDataUrl = async (): Promise<string | null> => {
+  try {
+    const res = await fetch(logoAsset.url);
+    const blob = await res.blob();
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    console.error("Failed to load logo", e);
+    return null;
+  }
+};
+
 
 export const generateInvoicePDF = async (
   formData: InvoiceFormData,
