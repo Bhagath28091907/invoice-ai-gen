@@ -69,7 +69,7 @@ export const generateInvoicePDF = async (
   // Logo - top right corner, nicely sized
   const logoDataUrl = await loadLogoDataUrl();
   if (logoDataUrl) {
-    const logoSize = 14; // mm
+    const logoSize = 16; // mm
     try {
       pdf.addImage(
         logoDataUrl,
