@@ -69,15 +69,16 @@ export const generateInvoicePDF = async (
   // Logo - top right corner, nicely sized
   const logoDataUrl = await loadLogoDataUrl();
   if (logoDataUrl) {
-    const logoSize = 16; // mm
+    const logoWidth = 22; // mm (stretched horizontally)
+    const logoHeight = 18; // mm (stretched vertically)
     try {
       pdf.addImage(
         logoDataUrl,
         "JPEG",
-        pageWidth - margin - logoSize,
+        pageWidth - margin - logoWidth,
         yPos - 4,
-        logoSize,
-        logoSize
+        logoWidth,
+        logoHeight
       );
     } catch (e) {
       console.error("addImage failed", e);
