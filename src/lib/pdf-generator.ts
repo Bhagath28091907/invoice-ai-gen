@@ -63,19 +63,19 @@ export const generateInvoicePDF = async (
   pdf.setTextColor(0, 0, 0);
   pdf.text(`Invoice No: ${invoiceNumber}`, margin, yPos);
 
-  // Date - Top Right (same row as Invoice No, original layout)
-  pdf.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, pageWidth - margin, yPos, { align: "right" });
+  // Date - directly below Invoice No (top-left)
+  pdf.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, margin, yPos + 5);
 
-  // Logo - centered between Invoice No and Date, small so it doesn't push other elements
+  // Logo - top right corner, nicely sized
   const logoDataUrl = await loadLogoDataUrl();
   if (logoDataUrl) {
-    const logoSize = 9; // mm — small, fits within the top row
+    const logoSize = 14; // mm
     try {
       pdf.addImage(
         logoDataUrl,
         "JPEG",
-        (pageWidth - logoSize) / 2,
-        yPos - 6,
+        pageWidth - margin - logoSize,
+        yPos - 4,
         logoSize,
         logoSize
       );
@@ -92,6 +92,7 @@ export const generateInvoicePDF = async (
   // Full width layout (original position)
   yPos = 20;
   const fullWidth = pageWidth - 2 * margin;
+
 
 
 
