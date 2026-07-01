@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,21 +17,23 @@ export const useCustomItems = (userId: string | undefined) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // ponytail: ref avoids stale closure in fetchCustomItems — without it,
+  // refetch() called from event handlers can read an outdated userId.
+  const userIdRef = useRef(userId);
   useEffect(() => {
-    if (userId) {
-      fetchCustomItems();
-    }
+    userIdRef.current = userId;
   }, [userId]);
 
-  const fetchCustomItems = async () => {
-    if (!userId) return;
+  const fetchCustomItems = useCallback(async () => {
+    const currentUserId = userIdRef.current;
+    if (!currentUserId) return;
     
     setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('custom_items')
         .select('id, item_name, category, default_hsn, default_rate, default_gst, default_uom')
-        .eq('user_id', userId)
+        .eq('user_id', currentUserId)
         .order('item_name', { ascending: true });
 
       if (error) throw error;
@@ -42,7 +44,13 @@ export const useCustomItems = (userId: string | undefined) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      fetchCustomItems();
+    }
+  }, [userId, fetchCustomItems]);
 
   const addCustomItem = async (
     itemName: string, 
@@ -52,7 +60,7 @@ export const useCustomItems = (userId: string | undefined) => {
     defaultGst?: number,
     defaultUom?: string
   ): Promise<boolean> => {
-    if (!userId) {
+    if (!userIdRef.current) {
       toast({
         title: "Error",
         description: "You must be logged in to add items",
@@ -66,7 +74,7 @@ export const useCustomItems = (userId: string | undefined) => {
       const { error } = await supabase
         .from('custom_items')
         .insert([{ 
-          user_id: userId, 
+          user_id: userIdRef.current, 
           item_name: itemName,
           category,
           default_hsn: defaultHsn || null,
@@ -115,7 +123,7 @@ export const useCustomItems = (userId: string | undefined) => {
     defaultGst?: number,
     defaultUom?: string
   ): Promise<boolean> => {
-    if (!userId) {
+    if (!userIdRef.current) {
       toast({
         title: "Error",
         description: "You must be logged in to update items",
@@ -135,7 +143,7 @@ export const useCustomItems = (userId: string | undefined) => {
           default_gst: defaultGst || 0,
           default_uom: defaultUom || 'BOX'
         })
-        .eq('user_id', userId)
+        .eq('user_id', userIdRef.current)
         .eq('item_name', oldName);
 
       if (error) throw error;
@@ -160,7 +168,7 @@ export const useCustomItems = (userId: string | undefined) => {
   };
 
   const deleteCustomItem = async (itemName: string): Promise<boolean> => {
-    if (!userId) {
+    if (!userIdRef.current) {
       toast({
         title: "Error",
         description: "You must be logged in to delete items",
@@ -174,7 +182,7 @@ export const useCustomItems = (userId: string | undefined) => {
       const { error } = await supabase
         .from('custom_items')
         .delete()
-        .eq('user_id', userId)
+        .eq('user_id', userIdRef.current)
         .eq('item_name', itemName);
 
       if (error) throw error;

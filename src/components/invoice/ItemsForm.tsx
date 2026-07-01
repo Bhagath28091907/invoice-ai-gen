@@ -183,20 +183,13 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="overflow-hidden relative z-0">
-                <Select
-                  value={item.hsnCode || ""} 
-                  onValueChange={(value) => updateItem(item.id, "hsnCode", value)}
-                >
-                  <SelectTrigger className="w-full text-sm h-9 truncate">
-                    <SelectValue placeholder="HSN" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-[200] shadow-lg border">
-                    <SelectItem value="20052000">20052000</SelectItem>
-                    <SelectItem value="21069099">21069099</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Input 
+                className="text-xs h-9"
+                type="text" 
+                placeholder="HSN"
+                value={item.hsnCode || ""}
+                onChange={(e) => updateItem(item.id, "hsnCode", e.target.value)}
+              />
               <Input 
                 className="text-sm h-9 relative z-30"
                 type="number" 
