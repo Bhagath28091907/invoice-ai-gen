@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export interface CustomItem {
+  id: string;
   item_name: string;
   category: 'namkeen' | 'chips' | 'badam_milk' | 'sweets';
   default_hsn?: string;
@@ -29,7 +30,7 @@ export const useCustomItems = (userId: string | undefined) => {
     try {
       const { data, error } = await supabase
         .from('custom_items')
-        .select('item_name, category, default_hsn, default_rate, default_gst, default_uom')
+        .select('id, item_name, category, default_hsn, default_rate, default_gst, default_uom')
         .eq('user_id', userId)
         .order('item_name', { ascending: true });
 
