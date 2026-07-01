@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface CustomItem {
   item_name: string;
-  category: 'namkeen' | 'chips';
+  category: 'namkeen' | 'chips' | 'badam_milk' | 'sweets';
   default_hsn?: string;
   default_rate?: number;
   default_gst?: number;
@@ -45,7 +45,7 @@ export const useCustomItems = (userId: string | undefined) => {
 
   const addCustomItem = async (
     itemName: string, 
-    category: 'namkeen' | 'chips',
+    category: 'namkeen' | 'chips' | 'badam_milk' | 'sweets',
     defaultHsn?: string,
     defaultRate?: number,
     defaultGst?: number,
