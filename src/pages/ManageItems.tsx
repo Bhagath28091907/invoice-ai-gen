@@ -38,7 +38,7 @@ const ManageItems = () => {
   const { customItems, addCustomItem, updateCustomItem, deleteCustomItem, isLoading } = useCustomItems(user?.id);
   
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [addCategory, setAddCategory] = useState<'namkeen' | 'chips'>('namkeen');
+  const [addCategory, setAddCategory] = useState<'namkeen' | 'chips' | 'badam_milk' | 'sweets'>('namkeen');
   const [newItemName, setNewItemName] = useState("");
   const [newItemHsn, setNewItemHsn] = useState("");
   const [newItemRate, setNewItemRate] = useState("");
@@ -58,8 +58,17 @@ const ManageItems = () => {
 
   const namkeenItems = customItems.filter(item => item.category === 'namkeen');
   const chipsItems = customItems.filter(item => item.category === 'chips');
+  const badamMilkItems = customItems.filter(item => item.category === 'badam_milk');
+  const sweetsItems = customItems.filter(item => item.category === 'sweets');
 
-  const openAddDialog = (category: 'namkeen' | 'chips') => {
+  const categoryLabels: Record<'namkeen' | 'chips' | 'badam_milk' | 'sweets', string> = {
+    namkeen: 'Namkeen',
+    chips: 'Chips',
+    badam_milk: 'Badam Milk',
+    sweets: 'Sweets',
+  };
+
+  const openAddDialog = (category: 'namkeen' | 'chips' | 'badam_milk' | 'sweets') => {
     setAddCategory(category);
     setNewItemName("");
     setNewItemHsn("");
@@ -122,13 +131,13 @@ const ManageItems = () => {
     setItemToDelete(null);
   };
 
-  const ItemsTable = ({ items, title }: { items: CustomItem[], title: string }) => (
+  const ItemsTable = ({ items, title, category }: { items: CustomItem[], title: string, category: 'namkeen' | 'chips' | 'badam_milk' | 'sweets' }) => (
     <Card className="flex-1">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>{title}</CardTitle>
           <Button 
-            onClick={() => openAddDialog(title.toLowerCase() as 'namkeen' | 'chips')}
+            onClick={() => openAddDialog(category)}
             size="sm"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -202,15 +211,17 @@ const ManageItems = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ItemsTable items={namkeenItems} title="Namkeen" />
-        <ItemsTable items={chipsItems} title="Chips" />
+        <ItemsTable items={namkeenItems} title="Namkeen" category="namkeen" />
+        <ItemsTable items={chipsItems} title="Chips" category="chips" />
+        <ItemsTable items={badamMilkItems} title="Badam Milk" category="badam_milk" />
+        <ItemsTable items={sweetsItems} title="Sweets" category="sweets" />
       </div>
 
       {/* Add Item Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New {addCategory === 'namkeen' ? 'Namkeen' : 'Chips'} Item</DialogTitle>
+            <DialogTitle>Add New {categoryLabels[addCategory]} Item</DialogTitle>
             <DialogDescription>
               Enter the item details including default values for invoicing
             </DialogDescription>
