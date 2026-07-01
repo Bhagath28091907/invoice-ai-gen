@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Plus, Trash2, Check, ChevronsUpDown } from "lucide-react";
+import { Plus, Trash2, Check, ChevronsUpDown, Search } from "lucide-react";
 import { InvoiceItem } from "@/types/invoice";
 import { calculateItemAmounts } from "@/lib/invoice-calculations";
 import { cn } from "@/lib/utils";
@@ -29,9 +28,11 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
   const { user } = useAuth();
   const { customItems, isLoading } = useCustomItems(user?.id);
   const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({});
+  const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
 
   const togglePopover = (itemId: string, open: boolean) => {
     setOpenPopovers(prev => ({ ...prev, [itemId]: open }));
+    if (open) setSearchQueries(prev => ({ ...prev, [itemId]: "" }));
   };
 
   const addItem = () => {
@@ -141,35 +142,48 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-[300px] p-0 bg-background z-50 shadow-lg border" align="start">
-                    <Command className="bg-background" key={`cmd-${customItems.length}`}>
-                      <CommandInput placeholder="Search items..." className="h-9" />
-                      <CommandList className="max-h-[300px]">
-                        <CommandEmpty>
-                          <div className="text-center py-4">
-                            <p className="text-sm text-muted-foreground">
-                              {isLoading ? "Loading items..." : "No item found."}
-                            </p>
-                          </div>
-                        </CommandEmpty>
-                        <CommandGroup>
-                          {customItems.map((customItem) => (
-                            <CommandItem
-                              key={customItem.item_name}
-                              value={customItem.item_name}
-                              onSelect={() => handleItemSelect(item.id, customItem.item_name)}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  item.description === customItem.item_name ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              {customItem.item_name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
+                    <div className="flex items-center border-b px-3">
+                      <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                      <input
+                        className="flex h-9 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                        placeholder="Search items..."
+                        value={searchQueries[item.id] || ""}
+                        onChange={(e) => setSearchQueries(prev => ({ ...prev, [item.id]: e.target.value }))}
+                      />
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto p-1">
+                      {(() => {
+                        const q = (searchQueries[item.id] || "").toLowerCase().trim();
+                        const filtered = q
+                          ? customItems.filter(ci => ci.item_name.toLowerCase().includes(q))
+                          : customItems;
+                        if (filtered.length === 0) {
+                          return (
+                            <div className="text-center py-4">
+                              <p className="text-sm text-muted-foreground">
+                                {isLoading ? "Loading items..." : "No item found."}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return filtered.map((customItem) => (
+                          <button
+                            type="button"
+                            key={customItem.item_name}
+                            onClick={() => handleItemSelect(item.id, customItem.item_name)}
+                            className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                item.description === customItem.item_name ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {customItem.item_name}
+                          </button>
+                        ));
+                      })()}
+                    </div>
                   </PopoverContent>
                 </Popover>
               </div>
