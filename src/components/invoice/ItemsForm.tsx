@@ -8,7 +8,7 @@ import { InvoiceItem } from "@/types/invoice";
 import { calculateItemAmounts } from "@/lib/invoice-calculations";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { useCustomItems } from "@/hooks/useCustomItems";
+import { CustomItem, useCustomItems } from "@/hooks/useCustomItems";
 import { useAuth } from "@/hooks/useAuth";
 
 interface ItemsFormProps {
@@ -26,13 +26,16 @@ const GST_RATES = [
 
 export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
   const { user } = useAuth();
-  const { customItems, isLoading } = useCustomItems(user?.id);
+  const { customItems, isLoading, refetch } = useCustomItems(user?.id);
   const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({});
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
 
   const togglePopover = (itemId: string, open: boolean) => {
     setOpenPopovers(prev => ({ ...prev, [itemId]: open }));
-    if (open) setSearchQueries(prev => ({ ...prev, [itemId]: "" }));
+    if (open) {
+      setSearchQueries(prev => ({ ...prev, [itemId]: "" }));
+      void refetch();
+    }
   };
 
   const addItem = () => {
@@ -68,30 +71,22 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
   };
 
   // Handle item selection with auto-population
-  const handleItemSelect = (itemId: string, itemName: string) => {
-    const selectedCustomItem = customItems.find(ci => ci.item_name === itemName);
-    
-    if (selectedCustomItem) {
-      // Auto-populate default values
-      const updatedItems = items.map(item => {
-        if (item.id === itemId) {
-          const updatedItem = {
-            ...item,
-            description: itemName,
-            hsnCode: selectedCustomItem.default_hsn || item.hsnCode,
-            rate: selectedCustomItem.default_rate || item.rate,
-            gstRate: selectedCustomItem.default_gst || item.gstRate,
-            uom: selectedCustomItem.default_uom || item.uom,
-          };
-          return calculateItemAmounts(updatedItem);
-        }
-        return item;
-      });
-      onItemsChange(updatedItems);
-    } else {
-      // Just update the description
-      updateItem(itemId, "description", itemName);
-    }
+  const handleItemSelect = (itemId: string, selectedCustomItem: CustomItem) => {
+    const updatedItems = items.map(item => {
+      if (item.id === itemId) {
+        const updatedItem = {
+          ...item,
+          description: selectedCustomItem.item_name,
+          hsnCode: selectedCustomItem.default_hsn ?? item.hsnCode,
+          rate: Number(selectedCustomItem.default_rate ?? item.rate),
+          gstRate: Number(selectedCustomItem.default_gst ?? item.gstRate),
+          uom: selectedCustomItem.default_uom ?? item.uom,
+        };
+        return calculateItemAmounts(updatedItem);
+      }
+      return item;
+    });
+    onItemsChange(updatedItems);
     
     togglePopover(itemId, false);
   };
@@ -132,6 +127,7 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                 <Popover open={openPopovers[item.id]} onOpenChange={(open) => togglePopover(item.id, open)}>
                   <PopoverTrigger asChild>
                     <Button
+                      type="button"
                       variant="outline"
                       role="combobox"
                       aria-expanded={openPopovers[item.id]}
@@ -169,8 +165,8 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                         return filtered.map((customItem) => (
                           <button
                             type="button"
-                            key={customItem.item_name}
-                            onClick={() => handleItemSelect(item.id, customItem.item_name)}
+                            key={customItem.id}
+                            onClick={() => handleItemSelect(item.id, customItem)}
                             className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
                           >
                             <Check
