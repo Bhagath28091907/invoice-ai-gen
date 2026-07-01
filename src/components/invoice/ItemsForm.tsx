@@ -141,12 +141,14 @@ export const ItemsForm = ({ items, onItemsChange }: ItemsFormProps) => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-[300px] p-0 bg-background z-50 shadow-lg border" align="start">
-                    <Command className="bg-background">
+                    <Command className="bg-background" key={`cmd-${customItems.length}`}>
                       <CommandInput placeholder="Search items..." className="h-9" />
                       <CommandList className="max-h-[300px]">
                         <CommandEmpty>
                           <div className="text-center py-4">
-                            <p className="text-sm text-muted-foreground">No item found.</p>
+                            <p className="text-sm text-muted-foreground">
+                              {isLoading ? "Loading items..." : "No item found."}
+                            </p>
                           </div>
                         </CommandEmpty>
                         <CommandGroup>
